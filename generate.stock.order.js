@@ -34,33 +34,28 @@ utils.savePayloadConfigToFiles(params);
 
 //console.log('==== ' + process.env.NODE_ENV + ' ====');
 var nconf = require('nconf');
-nconf.argv()
-  //.env()
-  .file('config', { file: 'config/' + process.env.NODE_ENV + '.json' })
-  .file('client', { file: 'config/client.' + process.env.NODE_ENV + '.json' })
-  .file('oauth', { file: 'config/oauth.' + process.env.NODE_ENV + '.json' })
-  .file('settings', { file: 'config/settings.' + process.env.NODE_ENV + '.json' });
+nconf.file('client', { file: 'config/client.json' })
+  .file('oauth', { file: 'config/oauth.json' });
 
 console.log(
-    'config/' + process.env.NODE_ENV + '.json',
     'config/client.' + process.env.NODE_ENV + '.json',
     'config/oauth.' + process.env.NODE_ENV + '.json'
 );
 console.log(nconf.get());
 
-var app = require('./client/loopback.js');
+var client = require('./client/loopback.js');
 // the remote datasource
-var remoteDs = app.dataSources.remoteDS;
+var remoteDS = client.dataSources.remoteDS;
 // the strong-remoting RemoteObjects instance
-var remotes = remoteDs.connector.remotes;
+var remotes = remoteDS.connector.remotes;
 
 // set the access token to be used for all future invocations
 remotes.auth = {
-  bearer: (new Buffer('1ZHlibJhux3cv5HLyfgT3Fwrxo137LTbB4uu3md9Rm9zHvzIWqiREecEcQFhAC4K')).toString('base64'),
+  bearer: (new Buffer(params.loopbackAccessToken)).toString('base64'),
   sendImmediately: true
 };
 
-/*app.models.Person.create({
+/*client.models.Person.create({
     name: 'Fred'
   },
   function(err, newperson) {
@@ -73,13 +68,13 @@ generateStockOrder.run(params.outletId, params.supplierId)
   .then(function(rows){
     console.log(rows);
 
-    app.models.ReportModel.findById(1,
+    client.models.ReportModel.findById(1,
       function(err, reportModelInstance) {
         console.log('Find a ReportModel...');
         console.log(err || reportModelInstance);
 
         reportModelInstance.content = rows;
-        app.models.ReportModel.updateAll(
+        client.models.ReportModel.updateAll(
           {id: 1},
           reportModelInstance,
           function(err, info) {
@@ -89,7 +84,7 @@ generateStockOrder.run(params.outletId, params.supplierId)
       });
   });
 
-/*app.models.ReportModel.findById(1,
+/*client.models.ReportModel.findById(1,
   function(err, reportModelInstance) {
     console.log('Find a ReportModel...');
     console.log(err || reportModelInstance);
