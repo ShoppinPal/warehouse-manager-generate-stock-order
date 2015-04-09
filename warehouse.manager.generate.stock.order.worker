@@ -9,8 +9,22 @@ file 'package.json' # include dependency manifest when uploading
 
 #name 'warehouse.manager.generate.stock.order'
 
-# upload the configuration directory to Iron
-dir 'config'
-dir 'client'
-dir 'common'
-dir 'jobs'
+#dir 'config' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
+file 'config/client.json'
+file 'config/oauth.json'
+
+#dir 'client' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
+file 'client/config.json'
+file 'client/datasources.json'
+file 'client/loopback.js'
+file 'client/middleware.json'
+file 'client/model-config.json'
+file 'client/package.json'
+
+#dir 'common' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
+file 'common/models/report-model.js'
+file 'common/models/report-model.json'
+
+#dir 'jobs' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
+file 'jobs/utils/utils.js'
+file 'jobs/generate-stock-order.js'
