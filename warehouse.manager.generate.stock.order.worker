@@ -5,26 +5,28 @@ stack 'node-0.10'
 # exec is the file that will be executed when you queue a task
 exec 'generate.stock.order.js'
 
+#full_remote_build true # doesn't work for local testing, packages aren't downloaded in the virtual container
+#dir 'node_modules' # include dependency files when uploading
 file 'package.json' # include dependency manifest when uploading
 
 #name 'warehouse.manager.generate.stock.order'
 
 #dir 'config' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
-file 'config/client.json'
-file 'config/oauth.json'
+file 'config/client.json', 'config'
+file 'config/oauth.json', 'config'
 
 #dir 'client' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
-file 'client/config.json'
-file 'client/datasources.json'
-file 'client/loopback.js'
-file 'client/middleware.json'
-file 'client/model-config.json'
-file 'client/package.json'
+file 'client/config.json', 'client'
+file 'client/datasources.json', 'client'
+file 'client/loopback.js', 'client'
+file 'client/middleware.json', 'client'
+file 'client/model-config.json', 'client'
+file 'client/package.json', 'client'
 
 #dir 'common' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
-file 'common/models/report-model.js'
-file 'common/models/report-model.json'
+file 'common/models/report-model.js', 'common/models'
+file 'common/models/report-model.json', 'common/models'
 
 #dir 'jobs' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
-file 'jobs/utils/utils.js'
-file 'jobs/generate-stock-order.js'
+file 'jobs/utils/utils.js', 'jobs/utils'
+file 'jobs/generate-stock-order.js', 'jobs'

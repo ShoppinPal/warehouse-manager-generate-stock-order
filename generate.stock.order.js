@@ -30,52 +30,44 @@ console.log('params:', params);
 console.log('config:', config);
 console.log('task_id:', task_id);
 
-utils.savePayloadConfigToFiles(params);
+utils.savePayloadConfigToFiles(params)
+  .then(function(){
+    var nconf = require('nconf');
+    nconf.file('client', { file: 'config/client.json' })
+      .file('oauth', { file: 'config/oauth.json' });
 
-//console.log('==== ' + process.env.NODE_ENV + ' ====');
-var nconf = require('nconf');
-nconf.file('client', { file: 'config/client.json' })
-  .file('oauth', { file: 'config/oauth.json' });
+    console.log(nconf.get());
 
-console.log(nconf.get());
+    var client = require('./client/loopback.js');
+    // the remote datasource
+    var remoteDS = client.dataSources.remoteDS;
+    // the strong-remoting RemoteObjects instance
+    var remotes = remoteDS.connector.remotes;
 
-var client = require('./client/loopback.js');
-// the remote datasource
-var remoteDS = client.dataSources.remoteDS;
-// the strong-remoting RemoteObjects instance
-var remotes = remoteDS.connector.remotes;
+    // set the access token to be used for all future invocations
+    remotes.auth = {
+      bearer: (new Buffer(params.loopbackAccessToken)).toString('base64'),
+      sendImmediately: true
+    };
 
-// set the access token to be used for all future invocations
-remotes.auth = {
-  bearer: (new Buffer(params.loopbackAccessToken)).toString('base64'),
-  sendImmediately: true
-};
+    var generateStockOrder = require('./jobs/generate-stock-order.js');
+    generateStockOrder.run(params.outletId, params.supplierId)
+      .then(function(rows){
+        console.log(rows);
 
-/*client.models.Person.create({
-    name: 'Fred'
-  },
-  function(err, newperson) {
-    console.log('Created Person...');
-    console.log(err || newperson);
-  });*/
+        client.models.ReportModel.findById(1,
+          function(err, reportModelInstance) {
+            console.log('Find a ReportModel...');
+            console.log(err || reportModelInstance);
 
-var generateStockOrder = require('./jobs/generate-stock-order.js');
-generateStockOrder.run(params.outletId, params.supplierId)
-  .then(function(rows){
-    console.log(rows);
-
-    client.models.ReportModel.findById(1,
-      function(err, reportModelInstance) {
-        console.log('Find a ReportModel...');
-        console.log(err || reportModelInstance);
-
-        reportModelInstance.content = rows;
-        client.models.ReportModel.updateAll(
-          {id: 1},
-          reportModelInstance,
-          function(err, info) {
-            console.log('Update a ReportModel...');
-            console.log(err || info);
+            reportModelInstance.content = rows;
+            client.models.ReportModel.updateAll(
+              {id: 1},
+              reportModelInstance,
+              function(err, info) {
+                console.log('Update a ReportModel...');
+                console.log(err || info);
+              });
           });
       });
   });

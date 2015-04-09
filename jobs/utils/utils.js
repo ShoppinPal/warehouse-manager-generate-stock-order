@@ -11,24 +11,25 @@ var savePayloadConfigToFiles = function(payload){
 
   var oauthFile = path.join(__dirname, '..', '..', 'config', 'oauth.json');
   console.log('oauthFile: ' + oauthFile);
-  fileSystem.write(
+  return fileSystem.write(
     oauthFile,
     JSON.stringify({
       'access_token': payload.accessToken,
       'token_type': payload.tokenType,
       'refresh_token': payload.refreshToken,
       'domain_prefix': payload.domainPrefix
-    },null,2));
-
-  var clientFile = path.join(__dirname, '..', '..', 'config', 'client.json');
-  console.log('clientFile: ' + clientFile);
-  fileSystem.write(
-    clientFile,
-    JSON.stringify({
-      'token_service': payload.tokenService,
-      'client_id': payload.clientId,
-      'client_secret': payload.clientSecret
-    },null,2));
+    },null,2))
+    .then(function(){
+      var clientFile = path.join(__dirname, '..', '..', 'config', 'client.json');
+      console.log('clientFile: ' + clientFile);
+      return fileSystem.write(
+        clientFile,
+        JSON.stringify({
+          'token_service': payload.tokenService,
+          'client_id': payload.clientId,
+          'client_secret': payload.clientSecret
+        },null,2));
+    });
 };
 
 var updateOauthTokens = function(connectionInfo){
