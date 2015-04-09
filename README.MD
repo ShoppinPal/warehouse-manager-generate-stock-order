@@ -1,7 +1,7 @@
 1. The first thing we need to do is add the worker to our Iron.io account.
 
   ```
-$ iron_worker upload https://github.com/shoppinpal/warehouse-manager-generate-stock-order/blob/master/warehouse.manager.generate.stock.order.worker
+$ iron_worker upload https://raw.github.com/shoppinpal/warehouse-manager-generate-stock-order/master/warehouse.manager.generate.stock.order.worker
   ```
 
 2. Now that it's in our account, we can start queuing up jobs/tasks using the IronWorker API, which is simply an HTTP request with a payload so we can do it from any language or even curl:
