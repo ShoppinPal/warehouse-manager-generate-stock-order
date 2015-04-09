@@ -5,7 +5,6 @@ stack 'node-0.10'
 # exec is the file that will be executed when you queue a task
 exec 'generate.stock.order.js'
 
-#full_remote_build true # doesn't work for local testing, packages aren't downloaded in the virtual container
 #dir 'node_modules' # include dependency files when uploading
 file 'package.json' # include dependency manifest when uploading
 
@@ -30,3 +29,7 @@ file 'common/models/report-model.json', 'common/models'
 #dir 'jobs' # iron_worker cli tool can not explore dir contents over http protocol for turnkey workers
 file 'jobs/utils/utils.js', 'jobs/utils'
 file 'jobs/generate-stock-order.js', 'jobs'
+
+# build your dependencies remotely from package.json
+full_remote_build true
+build "npm install" # must be explicitly specified for turnkey builds
