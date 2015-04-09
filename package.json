@@ -1,0 +1,26 @@
+{
+  "name": "warehouse.manager.generate.stock.order",
+  "version": "1.0.0",
+  "main": "warehouse.manager.generate.stock.order.js",
+  "scripts": {
+    "pretest": "jshint ."
+  },
+  "dependencies": {
+    "asking": "0.1.2",
+    "bluebird": "2.9.24",
+    "compression": "1.0.3",
+    "errorhandler": "1.1.1",
+    "loopback": "2.5.0",
+    "loopback-boot": "2.2.0",
+    "loopback-datasource-juggler": "2.7.0",
+    "moment": "2.10.0",
+    "nconf": "0.7.1",
+    "q-io": "1.12.0",
+    "serve-favicon": "2.0.1",
+    "underscore": "1.8.3",
+    "vend-nodejs-sdk": "git://github.com/shoppinpal/vend-nodejs-sdk"
+  },
+  "devDependencies": {
+    "jshint": "2.5.6"
+  }
+}

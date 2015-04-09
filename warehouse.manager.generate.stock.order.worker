@@ -1,0 +1,17 @@
+# set the runtime language; this should be "node" for Node.js workers
+runtime 'node'
+stack 'node-0.10'
+
+# exec is the file that will be executed when you queue a task
+exec 'generate.stock.order.js'
+
+dir 'node_modules' # include dependency files when uploading
+file 'package.json' # include dependency manifest when uploading
+
+#name 'warehouse.manager.generate.stock.order'
+
+# upload the configuration directory to Iron
+dir 'config'
+dir 'client'
+dir 'common'
+dir 'jobs'
