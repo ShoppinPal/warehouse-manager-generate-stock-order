@@ -9,7 +9,7 @@ var vendSdk = require('vend-nodejs-sdk')({});
 var savePayloadConfigToFiles = function(payload){
   console.log('inside savePayloadConfigToFiles()');
 
-  var oauthFile = path.join(__dirname, 'config', 'oauth.json');
+  var oauthFile = path.join(__dirname, '..', '..', 'config', 'oauth.json');
   console.log('oauthFile: ' + oauthFile);
   fileSystem.write(
     oauthFile,
@@ -20,7 +20,7 @@ var savePayloadConfigToFiles = function(payload){
       'domain_prefix': payload.domainPrefix
     },null,2));
 
-  var clientFile = path.join(__dirname, 'config', 'client.json');
+  var clientFile = path.join(__dirname, '..', '..', 'config', 'client.json');
   console.log('clientFile: ' + clientFile);
   fileSystem.write(
     clientFile,
@@ -34,7 +34,7 @@ var savePayloadConfigToFiles = function(payload){
 var updateOauthTokens = function(connectionInfo){
   console.log('updating oauth.json ... in case there might have been token changes');
   //console.log('connectionInfo: ' + JSON.stringify(connectionInfo,null,2));
-  var oauthFile = path.join(__dirname, 'config', 'oauth.json');
+  var oauthFile = path.join(__dirname, '..', '..', 'config', 'oauth.json');
   console.log('oauthFile: ' + oauthFile);
   return fileSystem.write(
     oauthFile,

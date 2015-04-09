@@ -37,10 +37,6 @@ var nconf = require('nconf');
 nconf.file('client', { file: 'config/client.json' })
   .file('oauth', { file: 'config/oauth.json' });
 
-console.log(
-    'config/client.' + process.env.NODE_ENV + '.json',
-    'config/oauth.' + process.env.NODE_ENV + '.json'
-);
 console.log(nconf.get());
 
 var client = require('./client/loopback.js');
