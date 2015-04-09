@@ -31,5 +31,6 @@ file 'jobs/utils/utils.js', 'jobs/utils'
 file 'jobs/generate-stock-order.js', 'jobs'
 
 # build your dependencies remotely from package.json
+gem 'iron_worker_ng'
 full_remote_build true
 build "npm install" # must be explicitly specified for turnkey builds
