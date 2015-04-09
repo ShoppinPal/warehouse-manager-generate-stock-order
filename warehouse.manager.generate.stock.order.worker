@@ -5,7 +5,8 @@ stack 'node-0.10'
 # exec is the file that will be executed when you queue a task
 exec 'generate.stock.order.js'
 
-dir 'node_modules' # include dependency files when uploading
+#dir 'node_modules' # include dependency files when uploading
+file 'config/oauth.json', 'node_modules' # maybe just a folder is missing in iron? force its creation?
 file 'package.json' # include dependency manifest when uploading
 
 #name 'warehouse.manager.generate.stock.order'
