@@ -1,25 +1,15 @@
-1. The first thing we need to do is add the worker to our Iron.io account.
+1. `node generate.stock.order.js -payload payload.json`
+
+2. `docker run --rm -v "$(pwd)":/Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order -w /Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order iron/images:node-0.10 sh -c 'node generate.stock.order.js -payload payload.json'`
 
   ```
-$ iron_worker upload https://raw.github.com/shoppinpal/warehouse-manager-generate-stock-order/master/warehouse.manager.generate.stock.order.worker
+module.js:340
+    throw err;
+          ^
+Error: Cannot find module '/Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order/generate.stock.order.js'
+    at Function.Module._resolveFilename (module.js:338:15)
+    at Function.Module._load (module.js:280:25)
+    at Function.Module.runMain (module.js:497:10)
+    at startup (node.js:119:16)
+    at node.js:906:3
   ```
-
-2. Now that it's in our account, we can start queuing up jobs/tasks using the IronWorker API, which is simply an HTTP request with a payload so we can do it from any language or even curl:
-
-  ```
-$ curl https://worker-aws-us-east-1.iron.io/2/projects/YOUR_PROJECT_ID/tasks
-  --header "Authorization: OAuth YOUR_TOKEN" \
-  --header "Content-Type: application/json" \
-  -d '{
-      "tasks": [
-        {
-          "code_name": "hello",
-          "payload": "{\n  \"token_service\": \"https:\/\/{DOMAIN_PREFIX}.vendhq.com\/api\/1.0\/token\",\n  \"client_id\": \"SUBSTITUTE\",\n  \"client_secret\": \"SUBSTITUTE\",\n  \"access_token\": \"SUBSTITUTE\",\n  \"token_type\": \"Bearer\",\n  \"refresh_token\": \"SUBSTITUTE\",\n  \"domain_prefix\": \"SUBSTITUTE\",\n  \"loopbackAccessToken\": \"SUBSTITUTE\",\n  \"reportId\":SUBSTITUTE,\n  \"outletId\":\"SUBSTITUTE\",\n  \"supplierId\":\"SUBSTITUTE\"\n}"
-        }
-      ]
-    }'
-  ```
-
-node generate.stock.order.js -payload payload.json
-
-docker run --rm -v "$(pwd)":/Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order -w /Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order iron/images:node-0.10 sh -c 'node generate.stock.order.js -payload payload.json'
