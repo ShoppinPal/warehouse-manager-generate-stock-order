@@ -7,6 +7,7 @@ exec 'generate.stock.order.js'
 
 #dir 'node_modules' # include dependency files when uploading, uncomment to test locally :(
 file 'package.json' # include dependency manifest when uploading
+file 'npm-shrinkwrap.json' # include dependency manifest when uploading
 
 #name 'warehouse.manager.generate.stock.order'
 
