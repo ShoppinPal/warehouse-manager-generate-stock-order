@@ -1,35 +1,14 @@
-var fs = require('fs');
-var utils = require('./jobs/utils/utils.js');
-//var Promise = require('bluebird');
+var iron_worker = require('iron_worker');
 
-var params = null;
-var task_id = null;
-var config = null;
-
-console.log(process.argv);
-process.argv.forEach(function(val, index, array) {
-  if (val == '-payload') {
-    params = JSON.parse(fs.readFileSync(process.argv[index + 1], 'utf8'));
-  }
-
-  if (val === '-config') {
-    config = JSON.parse(fs.readFileSync(process.argv[index + 1], 'utf8'));
-  }
-
-  if (val === '-id') {
-    task_id = process.argv[index + 1];
-  }
-});
-
-/*var worker = require('node_helper');
-console.log('params:', worker.params);
-console.log('config:', worker.config);
-console.log('task_id:', worker.task_id);*/
+var params = iron_worker.params();
+var task_id = iron_worker.taskId();
+var config = iron_worker.config();
 
 console.log('params:', params);
 console.log('config:', config);
 console.log('task_id:', task_id);
 
+var utils = require('./jobs/utils/utils.js');
 utils.savePayloadConfigToFiles(params)
   .then(function(){
     var nconf = require('nconf');

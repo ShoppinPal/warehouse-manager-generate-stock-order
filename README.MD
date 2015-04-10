@@ -19,3 +19,7 @@ $ curl https://worker-aws-us-east-1.iron.io/2/projects/YOUR_PROJECT_ID/tasks
       ]
     }'
   ```
+
+node generate.stock.order.js -payload payload.json
+
+docker run --rm -v "$(pwd)":/Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order -w /Users/pulkitsinghal/dev/warehouse-manager-generate-stock-order iron/images:node-0.10 sh -c 'node generate.stock.order.js -payload payload.json'
