@@ -19,3 +19,11 @@ $ curl https://worker-aws-us-east-1.iron.io/2/projects/YOUR_PROJECT_ID/tasks
       ]
     }'
   ```
+3. If you want to do it the old-fashioned way, you can always test locally with:
+  ```
+$ iron_worker run warehouse-manager-generate-stock-order --payload-file ./tests/payload.json
+  ```
+4. And deploy with:
+  ```
+$ iron_worker upload warehouse-manager-generate-stock-order
+  ```

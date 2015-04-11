@@ -28,7 +28,19 @@ var savePayloadConfigToFiles = function(payload){
           'token_service': payload.tokenService,
           'client_id': payload.clientId,
           'client_secret': payload.clientSecret
-        },null,2));
+        },null,2))
+        .then(function(){
+          // can't believe I need this code here, just to trap errors that won't float up the chain
+          return Promise.resolve();
+        },
+        function(err){ //TODO: why don't the errors caught by this block, travel up the chain when its absent?
+          console.error(err);
+          return Promise.reject(err);
+        });
+    },
+    function(err){ //TODO: why don't the errors caught by this block, travel up the chain when its absent?
+      console.error(err);
+      return Promise.reject(err);
     });
 };
 
