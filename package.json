@@ -1,6 +1,6 @@
 {
   "name": "warehouse.manager.generate.stock.order",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "warehouse.manager.generate.stock.order.js",
   "dependencies": {
     "asking": "^0.1.2",
