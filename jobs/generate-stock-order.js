@@ -36,7 +36,7 @@ var validateOutlet = function(outletId, connectionInfo) {
   }
 };
 
-var runMe = function(connectionInfo, outletId, resolvedSupplierName){
+var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplierName){
   return vendSdk.products.fetchAll(connectionInfo)
     .tap(function(products) {
       return utils.exportToJsonFileFormat(commandName, products);
@@ -85,10 +85,12 @@ var runMe = function(connectionInfo, outletId, resolvedSupplierName){
         var row = {
           sku: dilutedProduct.sku,
           name: dilutedProduct.name,
-          quantityinhand: dilutedProduct.inventory.count,
+          quantityOnHand: dilutedProduct.inventory.count,
           desiredStockLevel: dilutedProduct.inventory['reorder_point'],
-          orderqty: dilutedProduct.inventory['reorder_point'],
-          type: dilutedProduct.type
+          orderQuantity: dilutedProduct.inventory['reorder_point'],
+          type: dilutedProduct.type,
+          reportId: reportId,
+          userId: userId
         };
         rows.push(row);
         console.log(JSON.stringify(row, null, 2));
@@ -106,6 +108,10 @@ var GenerateStockOrder = {
   desc: 'Generate a stock order for warehouse',
 
   options: { // must not clash with global aliases: -t -d -f
+    reportId: {
+      type: 'string',
+      aliases: ['r'] // TODO: once Ronin is fixed to accept 2 characters as an alias, use 'ri' alias
+    },
     outletId: {
       type: 'string',
       aliases: ['o'] // TODO: once Ronin is fixed to accept 2 characters as an alias, use 'oi' alias
@@ -116,8 +122,8 @@ var GenerateStockOrder = {
     }
   },
 
-  run: function (outletId, supplierId) {
-    console.log('outletId', outletId, 'supplierId', supplierId);
+  run: function (reportId, outletId, supplierId, userId) {
+    console.log('reportId', reportId, 'outletId', outletId, 'supplierId', supplierId, 'userId', userId);
 
     var connectionInfo = utils.loadOauthTokens();
     commandName = commandName + '-'+ connectionInfo.domainPrefix;
@@ -131,7 +137,7 @@ var GenerateStockOrder = {
         return validateOutlet(outletId, connectionInfo)
           .then(function(resolvedOutletId) {
             outletId = resolvedOutletId;
-            return runMe(connectionInfo, outletId, resolvedSupplierName);
+            return runMe(connectionInfo, userId, reportId, outletId, resolvedSupplierName);
           });
       });
   }

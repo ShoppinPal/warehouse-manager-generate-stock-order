@@ -69,30 +69,43 @@ try {
 
         // set the access token to be used for all future invocations
         remotes.auth = {
-          bearer: (new Buffer(params.loopbackAccessToken)).toString('base64'),
+          bearer: (new Buffer(params.loopbackAccessToken.id)).toString('base64'),
           sendImmediately: true
         };
 
         var generateStockOrder = require('./jobs/generate-stock-order.js');
-        generateStockOrder.run(params.outletId, params.supplierId)
+        generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId)
           .then(function (rows) {
             console.log(rows);
 
-            client.models.ReportModel.findById(1,
-              function (err, reportModelInstance) {
-                console.log('Find a ReportModel...');
-                console.log(err || reportModelInstance);
+            return client.models.StockOrderLineitemModel.createAsync(rows)
+              .then(function (stockOrderLineitemModelInstances) {
+                console.log('Create all lineitems...');
+                console.log(stockOrderLineitemModelInstances);
 
-                reportModelInstance.state = 'manager';
-                reportModelInstance.content = rows;
-                client.models.ReportModel.updateAll(
-                  {id: params.reportId},
-                  reportModelInstance,
-                  function (err, info) {
-                    console.log('Update a ReportModel...');
-                    console.log(err || info);
+                // if the lineitems saved properly then move the STATE to the next stage
+                return client.models.ReportModel.findByIdAsync(params.reportId)
+                  .then(function (reportModelInstance) {
+                    console.log('Found the ReportModel...');
+                    console.log(reportModelInstance);
+
+                    reportModelInstance.state = 'manager';
+
+                    return client.models.ReportModel.updateAllAsync(
+                      {id: params.reportId},
+                      reportModelInstance
+                    )
+                      .then(function (info) {
+                        console.log('Updated the ReportModel...');
+                        console.log(info);
+                      });
                   });
+              })
+              .catch(function(error){
+                console.log('ERROR', error);
+                // TODO: throw or float up promise chain or just exit the worker process here?
               });
+
           });
       });
   }
