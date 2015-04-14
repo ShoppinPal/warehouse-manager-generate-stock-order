@@ -9,5 +9,11 @@
   },
   "ReportModel": {
     "dataSource": "remoteDS"
+  },
+  "StockOrderLineitemModel": {
+    "dataSource": "remoteDS"
+  },
+  "UserModel": {
+    "dataSource": "remoteDS"
   }
 }
