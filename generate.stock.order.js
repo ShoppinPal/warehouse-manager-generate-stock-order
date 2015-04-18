@@ -4,11 +4,14 @@ try {
   var path = require('path');
   //var Promise = require('bluebird');
 
+  // Global variable for logging
+  var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
+
   var params = null;
   var task_id = null;
   var config = null;
 
-  console.log(process.argv);
+  console.log(commandName, process.argv);
   process.argv.forEach(function (val, index, array) {
     if (val == '-payload') {
       params = JSON.parse(fs.readFileSync(process.argv[index + 1], 'utf8'));
@@ -23,9 +26,9 @@ try {
     }
   });
 
-  console.log('params:', params);
-  console.log('config:', config);
-  console.log('task_id:', task_id);
+  console.log(commandName, 'params:', params);
+  console.log(commandName, 'config:', config);
+  console.log(commandName, 'task_id:', task_id);
 
   try {
     return utils.savePayloadConfigToFiles(params)
@@ -34,11 +37,11 @@ try {
         nconf.file('client', { file: 'config/client.json' })
           .file('oauth', { file: 'config/oauth.json' });
 
-        console.log(nconf.get());
+        console.log(commandName, nconf.get());
 
         // HACK starts: dynamically set remote datasource URL
         var datasourcesFile = path.join(__dirname, 'client', 'datasources.json');
-        console.log('datasourcesFile: ' + datasourcesFile);
+        console.log(commandName, 'datasourcesFile: ' + datasourcesFile);
         fs.writeFileSync(datasourcesFile,
           JSON.stringify({
             "db": {
@@ -52,7 +55,7 @@ try {
             }
           }, null, 2));
         var datasourcesContent = require(datasourcesFile);
-        console.log('datasourcesContent: ' + JSON.stringify(datasourcesContent, null, 2));
+        console.log(commandName, 'datasourcesContent: ' + JSON.stringify(datasourcesContent, null, 2));
         // HACK ends
 
         var client = require('./client/loopback.js');
@@ -68,26 +71,37 @@ try {
         var remotes = remoteDS.connector.remotes;
 
         // set the access token to be used for all future invocations
+        console.log(commandName, 'params.loopbackAccessToken.id', params.loopbackAccessToken.id);
+        console.log(commandName, 'params.loopbackAccessToken.userId', params.loopbackAccessToken.userId);
         remotes.auth = {
           bearer: (new Buffer(params.loopbackAccessToken.id)).toString('base64'),
           sendImmediately: true
         };
 
+        // TODO: (1) create report if params.reportId is empty
+        // TODO: (2) figure out the total # of pages we will be dealing with
+        //           ex: 42 pages total
+        // TODO: (3) run the report for totalPages/5 pages
+        //           ex: page 1-5
+        // TODO: (4) queue the next job to work on the res of the pages
+        //           ex: start at page 6/42, work on pages 6-10
+        // TODO: (5) last job to run should change the state from `empty` to `manager`
+        //           ex: whomever process pages 40-42
+
         var generateStockOrder = require('./jobs/generate-stock-order.js');
         generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId)
           .then(function (rows) {
-            console.log(rows);
-
+            console.log(commandName, 'rows.length', rows.length);
             return client.models.StockOrderLineitemModel.createAsync(rows)
               .then(function (stockOrderLineitemModelInstances) {
-                console.log('Create all lineitems...');
-                console.log(stockOrderLineitemModelInstances);
+                console.log(commandName, 'Created all lineitems...', stockOrderLineitemModelInstances.length);
+                //console.log(stockOrderLineitemModelInstances);
 
                 // if the lineitems saved properly then move the STATE to the next stage
                 return client.models.ReportModel.findByIdAsync(params.reportId)
                   .then(function (reportModelInstance) {
-                    console.log('Found the ReportModel...');
-                    console.log(reportModelInstance);
+                    console.log(commandName, 'Found the ReportModel...');
+                    console.log(commandName, reportModelInstance);
 
                     reportModelInstance.state = 'manager';
 
@@ -96,13 +110,13 @@ try {
                       reportModelInstance
                     )
                       .then(function (info) {
-                        console.log('Updated the ReportModel...');
-                        console.log(info);
+                        console.log(commandName, 'Updated the ReportModel...');
+                        console.log(commandName, info);
                       });
                   });
               })
               .catch(function(error){
-                console.log('ERROR', error);
+                console.log(commandName, 'ERROR', error);
                 // TODO: throw or float up promise chain or just exit the worker process here?
               });
 
@@ -110,7 +124,7 @@ try {
       });
   }
   catch (e) {
-    console.error(e);
+    console.error(commandName, e);
   }
 
 }

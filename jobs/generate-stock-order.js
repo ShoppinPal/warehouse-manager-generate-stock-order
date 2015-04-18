@@ -38,9 +38,9 @@ var validateOutlet = function(outletId, connectionInfo) {
 
 var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplierName){
   return vendSdk.products.fetchAll(connectionInfo)
-    .tap(function(products) {
+    /*.tap(function(products) {
       return utils.exportToJsonFileFormat(commandName, products);
-    })
+    })*/
     .then(function(products) {
       console.log(commandName + ' > 1st tap block');
       console.log(commandName + ' > original products.length: ' + products.length);
@@ -93,7 +93,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
           userId: userId
         };
         rows.push(row);
-        console.log(JSON.stringify(row, null, 2));
+        //console.log(commandName, ' > ', JSON.stringify(row, null, 2));
       });
 
       console.log(commandName + ' > DONE');
