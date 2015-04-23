@@ -2,7 +2,7 @@ try {
   var fs = require('fs');
   var utils = require('./jobs/utils/utils.js');
   var path = require('path');
-  //var Promise = require('bluebird');
+  var Promise = require('bluebird');
 
   // Global variable for logging
   var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
@@ -71,15 +71,6 @@ try {
           // the strong-remoting RemoteObjects instance
           var remotes = remoteDS.connector.remotes;
 
-          // set the access token to be used for all future invocations
-          console.log(commandName, 'params.loopbackAccessToken.id', params.loopbackAccessToken.id);
-          console.log(commandName, 'params.loopbackAccessToken.userId', params.loopbackAccessToken.userId);
-          remotes.auth = {
-            bearer: (new Buffer(params.loopbackAccessToken.id)).toString('base64'),
-            sendImmediately: true
-          };
-
-        // TODO: (1) create report if params.reportId is empty
           // TODO: (2) figure out the total # of pages we will be dealing with
           //           ex: 42 pages total
           // TODO: (3) run the report for totalPages/5 pages
@@ -89,8 +80,66 @@ try {
           // TODO: (5) last job to run should change the state from `empty` to `manager`
           //           ex: whomever process pages 40-42
 
+          return Promise.resolve(params)
+            .then(function (params) { // (1) create a report if params.reportId is empty
+              console.log(commandName, 'WTF');
+              if (params.reportId === undefined || params.reportId === null) {
+                console.log(commandName, 'need to create a new report');
+
+                return client.models.UserModel.loginAsync(params.credentials) // get an access token
+                  .then(function(token) {
+                    console.log('Logged in as', params.credentials.email);
+
+                    params.loopbackAccessToken = token;
+
+                    // set the access token to be used for all future invocations
+                    console.log(commandName, 'params.loopbackAccessToken.id', params.loopbackAccessToken.id);
+                    console.log(commandName, 'params.loopbackAccessToken.userId', params.loopbackAccessToken.userId);
+                    remotes.auth = {
+                      bearer: (new Buffer(params.loopbackAccessToken.id)).toString('base64'),
+                      sendImmediately: true
+                    };
+                    console.log(commandName, 'the access token to be used for all future invocations has been set');
+
+                    return Promise.resolve();
+                  })
+                  .then(function(){
+                    return client.models.ReportModel.createAsync({
+                      userModelToReportModelId: params.loopbackAccessToken.userId, // explicitly setup the foreignKeys for related models
+                      state: 'empty',
+                      outlet: {
+                        id: params.outletId
+                      },
+                      supplier: {
+                        id: params.supplierId
+                      }
+                    });
+                  })
+                  .then(function (reportModelInstance) {
+                    console.log('new reportModelInstance:', reportModelInstance);
+                    params.reportId = reportModelInstance.id;
+                    return Promise.resolve();
+                  });
+              }
+              else {
+                console.log(commandName, 'report already exists');
+
+                // set the access token to be used for all future invocations
+                console.log(commandName, 'params.loopbackAccessToken.id', params.loopbackAccessToken.id);
+                console.log(commandName, 'params.loopbackAccessToken.userId', params.loopbackAccessToken.userId);
+                remotes.auth = {
+                  bearer: (new Buffer(params.loopbackAccessToken.id)).toString('base64'),
+                  sendImmediately: true
+                };
+                console.log(commandName, 'the access token to be used for all future invocations has been set');
+
+                return Promise.resolve();
+              }
+            })
+            .then(function () {
               var generateStockOrder = require('./jobs/generate-stock-order.js');
-        generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId)
+              return generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId);
+            })
             .then(function (rows) {
               console.log(commandName, 'rows.length', rows.length);
               return client.models.StockOrderLineitemModel.createAsync(rows)
@@ -120,7 +169,11 @@ try {
                   console.log(commandName, 'ERROR', error);
                   // TODO: throw or float up promise chain or just exit the worker process here?
                 });
-            });
+            })
+          .catch(function (error) {
+            console.log(commandName, 'ERROR', error);
+            // TODO: throw or float up promise chain or just exit the worker process here?
+          });
         }
         catch (e) {
           console.error(commandName, e);
