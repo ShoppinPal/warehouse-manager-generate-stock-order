@@ -30,6 +30,9 @@ try {
   console.log(commandName, 'config:', config);
   console.log(commandName, 'task_id:', task_id);
 
+  var SUCCESS = 0;
+  var FAILURE = 1;
+
   try {
     return utils.savePayloadConfigToFiles(params)
       .then(function () {
@@ -154,6 +157,7 @@ try {
                       console.log(commandName, reportModelInstance);
 
                       reportModelInstance.state = 'manager';
+                      reportModelInstance.totalRows = rows.length;
 
                       return client.models.ReportModel.updateAllAsync(
                         {id: params.reportId},
@@ -189,4 +193,5 @@ try {
 }
 catch (e) {
   console.error(e);
+  process.exit(FAILURE);
 }
