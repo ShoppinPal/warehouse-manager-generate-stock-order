@@ -57,10 +57,11 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       });
       console.log(commandName + ' > filtered products.length: ' + filteredProducts.length);
 
-      return utils.exportToJsonFileFormat(commandName+'-filteredProducts', filteredProducts)
+      /*return utils.exportToJsonFileFormat(commandName+'-filteredProducts', filteredProducts)
         .then(function() {
           return Promise.resolve(filteredProducts);
-        });
+        });*/
+      return Promise.resolve(filteredProducts);
     })
     .then(function(filteredProducts) {
       // let's dilute the product data even further
@@ -73,11 +74,12 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       }));
       console.log(commandName + ' > diluted products.length: ' + _.keys(dilutedProducts).length);
 
-      return utils.exportToJsonFileFormat(commandName+'-dilutedProducts', dilutedProducts)
+      /*return utils.exportToJsonFileFormat(commandName+'-dilutedProducts', dilutedProducts)
         .then(function() {
           //console.log(dilutedProducts);
           return Promise.resolve(dilutedProducts);
-        });
+        });*/
+      return Promise.resolve(dilutedProducts);
     })
     .then(function(dilutedProducts) {
       var rows = [];
