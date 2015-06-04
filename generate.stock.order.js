@@ -111,10 +111,12 @@ try {
                       userModelToReportModelId: params.loopbackAccessToken.userId, // explicitly setup the foreignKeys for related models
                       state: 'empty',
                       outlet: {
-                        id: params.outletId
+                        id: params.outletId,
+                        name: params.outletName // TODO: fetch via an api call instead?
                       },
                       supplier: {
-                        id: params.supplierId
+                        id: params.supplierId,
+                        name: params.supplierName // TODO: fetch via an api call instead?
                       }
                     });
                   })
