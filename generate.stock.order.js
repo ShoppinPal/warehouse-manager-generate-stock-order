@@ -3,6 +3,7 @@ try {
   var utils = require('./jobs/utils/utils.js');
   var path = require('path');
   var Promise = require('bluebird');
+  var _ = require('underscore');
 
   // Global variable for logging
   var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
@@ -147,11 +148,29 @@ try {
             })
             .then(function (rows) {
               console.log(commandName, 'rows.length', rows.length);
-              return client.models.StockOrderLineitemModel.createAsync(rows)
-                .then(function (stockOrderLineitemModelInstances) {
-                  console.log(commandName, 'Created all lineitems...', stockOrderLineitemModelInstances.length);
-                  //console.log(stockOrderLineitemModelInstances);
 
+              // split rows to be saved in chunks of 500
+              var i,j,rowChunks=[],chunkSize = 500;
+              for (i=0; i<Math.ceil(rows.length/chunkSize); i+=1) {
+                console.log(commandName, 'slice from index', i*chunkSize, 'up to but not including', i*chunkSize+chunkSize);
+                rowChunks.push(rows.slice(i*chunkSize,i*chunkSize+chunkSize));
+              }
+              console.log(commandName, 'rowChunks.length', rowChunks.length);
+
+              return Promise.map(
+                rowChunks,
+                function (aChunkOfRows) {
+                  console.log(commandName, 'Will create a chunk of lineitems with length:', aChunkOfRows.length);
+                  return client.models.StockOrderLineitemModel.createAsync(aChunkOfRows)
+                    .tap(function (stockOrderLineitemModelInstances) {
+                      // TODO: file a bug w/ strongloop support, the data that comes back
+                      // does not represent the newly created rows in size accurately
+                      console.log(commandName, 'Created a chunk of lineitems with length:', _.keys(stockOrderLineitemModelInstances).length);
+                    });
+                },
+                {concurrency: 1}
+              )
+                .then(function () {
                   // if the lineitems saved properly then move the STATE to the next stage
                   return client.models.ReportModel.findByIdAsync(params.reportId)
                     .then(function (reportModelInstance) {
@@ -165,7 +184,7 @@ try {
                         {id: params.reportId},
                         reportModelInstance
                       )
-                        .then(function (info) {
+                        .tap(function (info) {
                           console.log(commandName, 'Updated the ReportModel...');
                           console.log(commandName, info);
                         });
@@ -174,7 +193,7 @@ try {
                 .catch(function (error) {
                   console.error('3rd last dot-catch block');
                   console.log(commandName, 'ERROR', error);
-                  // TODO: throw or float up promise chain or just exit the worker process here?
+                  return Promise.reject(error);
                 });
             })
           .catch(function (error) {
