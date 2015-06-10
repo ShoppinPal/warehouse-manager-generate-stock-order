@@ -172,28 +172,38 @@ try {
                     });
                 })
                 .catch(function (error) {
+                  console.error('3rd last dot-catch block');
                   console.log(commandName, 'ERROR', error);
                   // TODO: throw or float up promise chain or just exit the worker process here?
                 });
             })
           .catch(function (error) {
+            console.error('2nd last dot-catch block');
             console.log(commandName, 'ERROR', error);
-            // TODO: throw or float up promise chain or just exit the worker process here?
+            return Promise.reject(error);
           });
         }
         catch (e) {
+          console.error('3rd last catch block');
           console.error(commandName, e);
           // TODO: throw or float up promise chain or just exit the worker process here?
         }
+      })
+      .catch(function (error) {
+        console.error('last dot-catch block');
+        console.log(commandName, 'ERROR', error);
+        process.exit(FAILURE); // this is the last one so exit the worker process
       });
   }
   catch (e) {
+    console.error('2nd last catch block');
     console.error(commandName, e);
     // TODO: throw or float up promise chain or just exit the worker process here?
   }
 
 }
 catch (e) {
+  console.error('last catch block');
   console.error(e);
   process.exit(FAILURE);
 }
