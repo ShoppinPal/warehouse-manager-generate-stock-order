@@ -1,3 +1,6 @@
+var SUCCESS = 0;
+var FAILURE = 1;
+
 try {
   var fs = require('fs');
   var utils = require('./jobs/utils/utils.js');
@@ -30,9 +33,6 @@ try {
   console.log(commandName, 'params:', params);
   console.log(commandName, 'config:', config);
   console.log(commandName, 'task_id:', task_id);
-
-  var SUCCESS = 0;
-  var FAILURE = 1;
 
   try {
     return utils.savePayloadConfigToFiles(params)
