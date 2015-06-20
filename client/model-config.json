@@ -3,6 +3,7 @@
     "sources": [
       "loopback/common/models",
       "loopback/server/models",
+      "warehouse/common/models",
       "../common/models",
       "./models"
     ]
