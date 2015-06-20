@@ -12,6 +12,5 @@ file 'npm-shrinkwrap.json' # include dependency manifest when uploading
 #name 'warehouse.manual'
 
 dir 'client'
-dir 'common'
 dir 'config'
 dir 'jobs'
