@@ -150,7 +150,7 @@ try {
               console.log(commandName, 'rows.length', rows.length);
 
               // split rows to be saved in chunks of 500
-              var i,j,rowChunks=[],chunkSize = 500;
+              var i, rowChunks=[], chunkSize = 500;
               for (i=0; i<Math.ceil(rows.length/chunkSize); i+=1) {
                 console.log(commandName, 'slice from index', i*chunkSize, 'up to but not including', i*chunkSize+chunkSize);
                 rowChunks.push(rows.slice(i*chunkSize,i*chunkSize+chunkSize));
