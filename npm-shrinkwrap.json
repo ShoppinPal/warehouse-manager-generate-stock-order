@@ -1597,34 +1597,34 @@
     },
     "serve-favicon": {
       "version": "2.2.0",
-      "from": "serve-favicon@^2.0.1",
+      "from": "https://registry.npmjs.org/serve-favicon/-/serve-favicon-2.2.0.tgz",
       "resolved": "https://registry.npmjs.org/serve-favicon/-/serve-favicon-2.2.0.tgz",
       "dependencies": {
         "etag": {
           "version": "1.5.1",
-          "from": "etag@~1.5.1",
+          "from": "https://registry.npmjs.org/etag/-/etag-1.5.1.tgz",
           "resolved": "https://registry.npmjs.org/etag/-/etag-1.5.1.tgz",
           "dependencies": {
             "crc": {
               "version": "3.2.1",
-              "from": "crc@3.2.1",
+              "from": "https://registry.npmjs.org/crc/-/crc-3.2.1.tgz",
               "resolved": "https://registry.npmjs.org/crc/-/crc-3.2.1.tgz"
             }
           }
         },
         "fresh": {
           "version": "0.2.4",
-          "from": "fresh@0.2.4",
+          "from": "https://registry.npmjs.org/fresh/-/fresh-0.2.4.tgz",
           "resolved": "https://registry.npmjs.org/fresh/-/fresh-0.2.4.tgz"
         },
         "ms": {
           "version": "0.7.0",
-          "from": "ms@0.7.0",
+          "from": "https://registry.npmjs.org/ms/-/ms-0.7.0.tgz",
           "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.0.tgz"
         },
         "parseurl": {
           "version": "1.3.0",
-          "from": "parseurl@~1.3.0",
+          "from": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.0.tgz",
           "resolved": "https://registry.npmjs.org/parseurl/-/parseurl-1.3.0.tgz"
         }
       }
