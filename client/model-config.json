@@ -3,7 +3,7 @@
     "sources": [
       "loopback/common/models",
       "loopback/server/models",
-      "shoppinpal-warehouse/common/models",
+      "shoppinpal-warehouse-mongo/common/models",
       "../common/models",
       "./models"
     ]
