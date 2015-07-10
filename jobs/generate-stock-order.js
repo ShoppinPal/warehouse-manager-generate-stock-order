@@ -85,6 +85,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       var rows = [];
       _.each(dilutedProducts, function(dilutedProduct){
         var row = {
+          productId: dilutedProduct.id,
           sku: dilutedProduct.sku,
           name: dilutedProduct.name,
           quantityOnHand: dilutedProduct.inventory.count,
