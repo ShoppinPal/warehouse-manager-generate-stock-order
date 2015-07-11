@@ -84,19 +84,49 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
     .then(function(dilutedProducts) {
       var rows = [];
       _.each(dilutedProducts, function(dilutedProduct){
-        var row = {
-          productId: dilutedProduct.id,
-          sku: dilutedProduct.sku,
-          name: dilutedProduct.name,
-          quantityOnHand: dilutedProduct.inventory.count,
-          desiredStockLevel: dilutedProduct.inventory['reorder_point'],
-          orderQuantity: dilutedProduct.inventory['reorder_point'],
-          type: dilutedProduct.type,
-          reportId: reportId,
-          userId: userId
-        };
-        rows.push(row);
-        //console.log(commandName, ' > ', JSON.stringify(row, null, 2));
+        var useRow = true;
+        var quantityOnHand = Number(dilutedProduct.inventory.count);
+        var desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
+        var orderQuantity = 0;
+        if(quantityOnHand < 0) {
+          console.log('TODO: how should negative inventory be handled?',
+            'DSL minus QOH w/ a negative QOH will lead to a positive! Example:',
+            '100 - (-2) = 102');
+        }
+        if(!_.isNaN(desiredStockLevel) && _.isNumber(desiredStockLevel)) {
+          orderQuantity = desiredStockLevel - quantityOnHand;
+          if (orderQuantity > 0) {
+            useRow = true;
+          }
+          else {
+            console.log('do not waste time on negative or zero orderQuantity', dilutedProduct);
+            useRow = false;
+          }
+        }
+        else {
+          console.log('give humans a chance to look over dubious data', dilutedProduct);
+          desiredStockLevel = undefined;
+          orderQuantity = undefined;
+          useRow = true;
+        }
+        if (useRow) {
+          var row = {
+            productId: dilutedProduct.id,
+            sku: dilutedProduct.sku,
+            name: dilutedProduct.name,
+            quantityOnHand: quantityOnHand,
+            desiredStockLevel: desiredStockLevel,
+            orderQuantity: orderQuantity,
+            type: dilutedProduct.type,
+            reportId: reportId,
+            userId: userId
+          };
+          rows.push(row);
+          //console.log(commandName, ' > ', JSON.stringify(row, null, 2));
+        }
+        else {
+          console.log('skipping', dilutedProduct);
+        }
       });
 
       console.log(commandName + ' > DONE');
