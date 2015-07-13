@@ -27,3 +27,7 @@ $ iron_worker run warehouse-manager-generate-stock-order --payload-file ./tests/
   ```
 $ iron_worker upload warehouse-manager-generate-stock-order
   ```
+
+* iron_worker upload warehouse.manual.mongo
+  * iron_worker run warehouse.manual.mongo --payload-file ./tests/local.patricias.sched.payload.json
+  * iron_worker run warehouse.manual.mongo --payload-file ./tests/staging.patricias.sched.payload.json
