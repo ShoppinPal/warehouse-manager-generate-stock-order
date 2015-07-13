@@ -7,15 +7,15 @@
     "bluebird": "^2.9.24",
     "compression": "^1.0.3",
     "errorhandler": "^1.1.1",
-    "loopback": "^2.5.0",
-    "loopback-boot": "^2.2.0",
-    "loopback-datasource-juggler": "^2.7.0",
+    "loopback": "2.18.0",
+    "loopback-boot": "2.8.1",
+    "loopback-datasource-juggler": "2.31.0",
     "moment": "^2.10.0",
     "nconf": "^0.7.1",
     "q-io": "^1.12.0",
     "serve-favicon": "^2.0.1",
-    "shoppinpal-warehouse": "1.0.1",
+    "shoppinpal-warehouse-mongo": "1.0.5",
     "underscore": "^1.8.3",
-    "vend-nodejs-sdk": "git://github.com/shoppinpal/vend-nodejs-sdk"
+    "vend-nodejs-sdk": "1.0.3"
   }
 }

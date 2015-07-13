@@ -11,7 +11,7 @@
     "errorhandler": "^1.1.1",
     "loopback": "2.18.0",
     "loopback-boot": "2.8.1",
-    "loopback-datasource-juggler": "2.30.1",
+    "loopback-datasource-juggler": "2.31.0",
     "serve-favicon": "^2.0.1"
   },
   "optionalDependencies": {
