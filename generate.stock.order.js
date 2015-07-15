@@ -1,6 +1,13 @@
 var SUCCESS = 0;
 var FAILURE = 1;
 
+var STATE_1 = 'manager_empty';
+var STATE_2 = 'manager_new_orders';
+var STATE_3 = 'manager_in_process';
+var STATE_4 = 'warehouse_fulfill';
+var STATE_5 = 'manager_receive';
+var STATE_6 = 'complete';
+
 try {
   var fs = require('fs');
   var utils = require('./jobs/utils/utils.js');
@@ -81,7 +88,7 @@ try {
           //           ex: page 1-5
           // TODO: (4) queue the next job to work on the res of the pages
           //           ex: start at page 6/42, work on pages 6-10
-          // TODO: (5) last job to run should change the state from `empty` to `manager`
+          // TODO: (5) last job to run should change the state from `manager_empty` to `manager_new_orders`
           //           ex: whomever process pages 40-42
 
           return Promise.resolve(params)
@@ -110,7 +117,7 @@ try {
                   .then(function(){
                     return client.models.ReportModel.createAsync({
                       userModelToReportModelId: params.loopbackAccessToken.userId, // explicitly setup the foreignKeys for related models
-                      state: 'empty',
+                      state: STATE_1,
                       outlet: {
                         id: params.outletId,
                         name: params.outletName // TODO: fetch via an api call instead?
@@ -177,7 +184,7 @@ try {
                       console.log(commandName, 'Found the ReportModel...');
                       console.log(commandName, reportModelInstance);
 
-                      reportModelInstance.state = 'manager';
+                      reportModelInstance.state = STATE_2;
                       reportModelInstance.totalRows = rows.length;
 
                       return client.models.ReportModel.updateAllAsync(
