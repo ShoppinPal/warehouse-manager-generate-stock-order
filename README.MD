@@ -29,5 +29,36 @@ $ iron_worker upload warehouse-manager-generate-stock-order
   ```
 
 * iron_worker upload warehouse.manual.mongo
+  * iron_worker run warehouse.manual.mongo --payload-file ./tests/local.fermiyontest.norman.ffcc.sched.payload.json
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/local.patricias.sched.payload.json
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/staging.patricias.sched.payload.json
+
+## Scheduled Jobs
+
+CDT is -0500
+CST is -0600
+so 8am CDT will turn into 7am CST?
+
+7 days = 7*24*60*60 = 604800 seconds
+1 day = 24*60*60 = 86400 seconds
+10 minutes = 10 * 60 = 600 seconds
+
+* How to create a scheduled job from command line?
+  ```
+iron_worker schedule warehouse.manual.mongo \
+--label test1 \
+--start-at "2015-01-01T08:00:00-05:00" \
+--run-every 604800 \
+--timeout 600 \
+--priority 2 \
+--cluster azure \
+--payload-file ./relative/path/to/YOUR_FILE_NAME
+  ```
+
+* create 4 scheduled jobs in one fell swoop
+  ```
+iron_worker schedule warehouse.manual.mongo --label staging.rock.ffcc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label staging.rock.csc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label staging.reno.ffcc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label staging.reno.csc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.csc.payload.json
+  ```
