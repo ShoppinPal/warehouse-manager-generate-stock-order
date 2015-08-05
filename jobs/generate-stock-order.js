@@ -117,6 +117,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
             quantityOnHand: quantityOnHand,
             desiredStockLevel: desiredStockLevel,
             orderQuantity: orderQuantity,
+            supplyPrice: dilutedProduct.supply_price,
             type: dilutedProduct.type,
             reportId: reportId,
             userId: userId
