@@ -149,65 +149,95 @@ try {
                 return Promise.resolve();
               }
             })
-            .then(function () {
-              var generateStockOrder = require('./jobs/generate-stock-order.js');
-              return generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId);
-            })
-            .then(function (rows) {
-              console.log(commandName, 'rows.length', rows.length);
-
-              // split rows to be saved in chunks of 500
-              var i, rowChunks=[], chunkSize = 500;
-              for (i=0; i<Math.ceil(rows.length/chunkSize); i+=1) {
-                console.log(commandName, 'slice from index', i*chunkSize, 'up to but not including', i*chunkSize+chunkSize);
-                rowChunks.push(rows.slice(i*chunkSize,i*chunkSize+chunkSize));
-              }
-              console.log(commandName, 'rowChunks.length', rowChunks.length);
-
-              return Promise.map(
-                rowChunks,
-                function (aChunkOfRows) {
-                  console.log(commandName, 'Will create a chunk of lineitems with length:', aChunkOfRows.length);
-                  return client.models.StockOrderLineitemModel.createAsync(aChunkOfRows)
-                    .tap(function (stockOrderLineitemModelInstances) {
-                      // TODO: file a bug w/ strongloop support, the data that comes back
-                      // does not represent the newly created rows in size accurately
-                      console.log(commandName, 'Created a chunk of lineitems with length:', _.keys(stockOrderLineitemModelInstances).length);
-                    });
-                },
-                {concurrency: 1}
-              )
-                .then(function () {
-                  // if the lineitems saved properly then move the STATE to the next stage
-                  return client.models.ReportModel.findByIdAsync(params.reportId)
-                    .then(function (reportModelInstance) {
-                      console.log(commandName, 'Found the ReportModel...');
-                      console.log(commandName, reportModelInstance);
-
-                      reportModelInstance.state = MANAGER_NEW_ORDERS;
-                      reportModelInstance.totalRows = rows.length;
-
-                      return client.models.ReportModel.updateAllAsync(
-                        {id: params.reportId},
-                        reportModelInstance
-                      )
-                        .tap(function (info) {
-                          console.log(commandName, 'Updated the ReportModel...');
-                          console.log(commandName, info);
-                        });
-                    });
-                })
-                .catch(function (error) {
-                  console.error('3rd last dot-catch block');
-                  console.log(commandName, 'ERROR', error);
-                  return Promise.reject(error);
+            .then(function() {
+              // TODO: check `.count()` on params.reportId and
+              //         - if there are no rows, call `generateStockOrder`
+              //         - otherwise call `importStockOrder`
+              var reportModelInstance = new client.models.ReportModel({id: params.reportId});
+              var stockOrderLineitemModels = Promise.promisifyAll(
+                reportModelInstance.stockOrderLineitemModels,
+                {
+                  filter: function(name, func, target){
+                    return !( name == 'validate');
+                  }
+                }
+              );
+              return stockOrderLineitemModels.countAsync()
+                .then(function (count) {
+                  if (count > 0) {
+                    return Promise.resolve('importStockOrder');
+                  } else {
+                    return Promise.resolve('generateStockOrder');
+                  }
                 });
             })
-          .catch(function (error) {
-            console.error('2nd last dot-catch block');
-            console.log(commandName, 'ERROR', error);
-            return Promise.reject(error);
-          });
+            .tap(function(methodName) {
+            })
+            .tap(function (methodName) {
+              if(methodName !== 'generateStockOrder') {
+                console.log('will skip generateStockOrder');
+                return Promise.resolve();
+              }
+              else {
+                var generateStockOrder = require('./jobs/generate-stock-order.js');
+                return generateStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId)
+                  .then(function (rows) {
+                    console.log(commandName, 'rows.length', rows.length);
+
+                    // split rows to be saved in chunks of 500
+                    var i, rowChunks=[], chunkSize = 500;
+                    for (i=0; i<Math.ceil(rows.length/chunkSize); i+=1) {
+                      console.log(commandName, 'slice from index', i*chunkSize, 'up to but not including', i*chunkSize+chunkSize);
+                      rowChunks.push(rows.slice(i*chunkSize,i*chunkSize+chunkSize));
+                    }
+                    console.log(commandName, 'rowChunks.length', rowChunks.length);
+
+                    return Promise.map(
+                      rowChunks,
+                      function (aChunkOfRows) {
+                        console.log(commandName, 'Will create a chunk of lineitems with length:', aChunkOfRows.length);
+                        return client.models.StockOrderLineitemModel.createAsync(aChunkOfRows)
+                          .tap(function (stockOrderLineitemModelInstances) {
+                            // TODO: file a bug w/ strongloop support, the data that comes back
+                            // does not represent the newly created rows in size accurately
+                            console.log(commandName, 'Created a chunk of lineitems with length:', _.keys(stockOrderLineitemModelInstances).length);
+                          });
+                      },
+                      {concurrency: 1}
+                    )
+                      .then(function () {
+                        // if the lineitems saved properly then move the STATE to the next stage
+                        return client.models.ReportModel.findByIdAsync(params.reportId)
+                          .then(function (reportModelInstance) {
+                            console.log(commandName, 'Found the ReportModel...');
+                            console.log(commandName, reportModelInstance);
+
+                            reportModelInstance.state = MANAGER_NEW_ORDERS;
+                            reportModelInstance.totalRows = rows.length;
+
+                            return client.models.ReportModel.updateAllAsync(
+                              {id: params.reportId},
+                              reportModelInstance
+                            )
+                              .tap(function (info) {
+                                console.log(commandName, 'Updated the ReportModel...');
+                                console.log(commandName, info);
+                              });
+                          });
+                      })
+                      .catch(function (error) {
+                        console.error('3rd last dot-catch block');
+                        console.log(commandName, 'ERROR', error);
+                        return Promise.reject(error);
+                      });
+                  });
+              }
+            })
+            .catch(function (error) {
+              console.error('2nd last dot-catch block');
+              console.log(commandName, 'ERROR', error);
+              return Promise.reject(error);
+            });
         }
         catch (e) {
           console.error('3rd last catch block');
