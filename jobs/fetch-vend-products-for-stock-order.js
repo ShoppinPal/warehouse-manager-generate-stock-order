@@ -65,7 +65,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
     })
     .then(function(filteredProducts) {
       // let's dilute the product data even further
-      console.log(commandName + ' > filtered products:\n', JSON.stringify(filteredProducts,null,2));
+      //console.log(commandName + ' > filtered products:\n', JSON.stringify(filteredProducts,null,2));
       var dilutedProducts = _.object(_.map(filteredProducts, function(product) {
         var neoProduct =  _.pick(product,'name','supply_price','id','sku','type');
         neoProduct.inventory = _.find(product.inventory, function(inv){
