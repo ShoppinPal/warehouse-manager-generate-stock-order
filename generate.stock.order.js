@@ -150,25 +150,28 @@ try {
               }
             })
             .then(function() {
-              // TODO: check `.count()` on params.reportId and
-              //         - if there are no rows, call `generateStockOrder`
-              //         - otherwise call `importStockOrder`
-              var reportModelInstance = new client.models.ReportModel({id: params.reportId});
-              var stockOrderLineitemModels = Promise.promisifyAll(
-                reportModelInstance.stockOrderLineitemModels,
-                {
-                  filter: function(name, func, target){
-                    return !( name == 'validate');
-                  }
-                }
-              );
-              return stockOrderLineitemModels.countAsync()
-                .then(function (count) {
-                  if (count > 0) {
-                    return Promise.resolve('importStockOrder');
-                  } else {
-                    return Promise.resolve('generateStockOrder');
-                  }
+              // NOTE: no time to investigate why we end up accidently nuking our foreign-keys
+              //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
+              //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
+
+              return client.models.ReportModel.findByIdAsync(params.reportId)
+                .then(function(reportModelInstance){
+                  var stockOrderLineitemModels = Promise.promisifyAll(
+                    reportModelInstance.stockOrderLineitemModels,
+                    {
+                      filter: function(name, func, target){
+                        return !( name == 'validate');
+                      }
+                    }
+                  );
+                  return stockOrderLineitemModels.countAsync()
+                    .then(function (count) {
+                      if (count > 0) {
+                        return Promise.resolve('importStockOrder');
+                      } else {
+                        return Promise.resolve('generateStockOrder');
+                      }
+                    });
                 });
             })
             .tap(function(methodName) {
@@ -182,73 +185,77 @@ try {
                 return Promise.resolve(products)*/ // NOTE: useful for quicker testing
                 return prepStockOrder.run(params.reportId, params.outletId, params.supplierId, params.loopbackAccessToken.userId)
                   .then(function (dilutedProducts) {
-                    var reportModelInstance = new client.models.ReportModel({id: params.reportId});
-                    var stockOrderLineitemModels = Promise.promisifyAll(
-                      reportModelInstance.stockOrderLineitemModels,
-                      {
-                        filter: function(name, func, target){
-                          return !( name == 'validate');
-                        }
-                      }
-                    );
-                    return stockOrderLineitemModels.countAsync()
-                      .then(function (count) {
-                        var pageSize = 200;
-                        var totalPages = Math.ceil(count / pageSize);
-                        console.log('Will traverse %d rows by fetching %d page(s) of size <= %d', count, totalPages, pageSize);
+                    // NOTE: no time to investigate why we end up accidently nuking our foreign-keys
+                    //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
+                    //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
+                    return client.models.ReportModel.findByIdAsync(params.reportId)
+                      .then(function(reportModelInstance){
+                        var stockOrderLineitemModels = Promise.promisifyAll(
+                          reportModelInstance.stockOrderLineitemModels,
+                          {
+                            filter: function(name, func, target){
+                              return !( name == 'validate');
+                            }
+                          }
+                        );
+                        return stockOrderLineitemModels.countAsync()
+                          .then(function (count) {
+                            var pageSize = 200;
+                            var totalPages = Math.ceil(count / pageSize);
+                            console.log('Will traverse %d rows by fetching %d page(s) of size <= %d', count, totalPages, pageSize);
 
-                        var pseudoArrayToIterateOverPagesSerially = new Array(totalPages);
-                        for (var i=0; i<totalPages; i++) {
-                          pseudoArrayToIterateOverPagesSerially[i] = i+1;
-                        }
+                            var pseudoArrayToIterateOverPagesSerially = new Array(totalPages);
+                            for (var i=0; i<totalPages; i++) {
+                              pseudoArrayToIterateOverPagesSerially[i] = i+1;
+                            }
 
-                        // constraint Promise.map with concurrency of 1 around pseudoArrayIterateAllPages
-                        return Promise.map(
-                          pseudoArrayToIterateOverPagesSerially,
-                          function (pageNumber) {
-                            return client.models.ReportModel.getRowsAsync(params.reportId, pageSize, pageNumber)
-                              .then(function (lineitems) {
-                                console.log('total lineitems retrieved for page #%d: %d', pageNumber, lineitems.length);
+                            // constraint Promise.map with concurrency of 1 around pseudoArrayIterateAllPages
+                            return Promise.map(
+                              pseudoArrayToIterateOverPagesSerially,
+                              function (pageNumber) {
+                                return client.models.ReportModel.getRowsAsync(params.reportId, pageSize, pageNumber)
+                                  .then(function (lineitems) {
+                                    console.log('total lineitems retrieved for page #%d: %d', pageNumber, lineitems.length);
 
-                                // cross-reference and fill out lineitems against data from Vend
-                                _.each(lineitems, function(lineitem, index){
-                                  //console.log('lookup vend data for lineitem.sku:', lineitem.sku);
-                                  var dilutedProduct = dilutedProducts[lineitem.sku];
-                                  if (dilutedProduct) {
-                                    lineitem.productId = dilutedProduct.id;
-                                    lineitem.name = dilutedProduct.name;
-                                    lineitem.quantityOnHand = Number(dilutedProduct.inventory.count);
-                                    lineitem.desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
-                                    lineitem.type = dilutedProduct.type;
-                                  } else {
-                                    console.log('WARN: did not find vend data for lineitem', lineitem);
-                                    // TODO: should we queue up these lineitem rows for deletion from the report?
-                                    //       or is it better to leave them for reporting purposes?
-                                  }
-                                });
+                                    // cross-reference and fill out lineitems against data from Vend
+                                    _.each(lineitems, function(lineitem, index){
+                                      //console.log('lookup vend data for lineitem.sku:', lineitem.sku);
+                                      var dilutedProduct = dilutedProducts[lineitem.sku];
+                                      if (dilutedProduct) {
+                                        lineitem.productId = dilutedProduct.id;
+                                        lineitem.name = dilutedProduct.name;
+                                        lineitem.quantityOnHand = Number(dilutedProduct.inventory.count);
+                                        lineitem.desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
+                                        lineitem.type = dilutedProduct.type;
+                                      } else {
+                                        console.log('WARN: did not find vend data for lineitem', lineitem);
+                                        // TODO: should we queue up these lineitem rows for deletion from the report?
+                                        //       or is it better to leave them for reporting purposes?
+                                      }
+                                    });
 
-                                // send update(s) to loopback
-                                return client.models.ReportModel.updateRowsAsync(params.reportId, lineitems);
-                              });
-                          },
-                          {concurrency: 1}
-                        )
-                          .then(function () {
-                            console.log('done paging serially through all existing stockOrderLineitemModels');
-
-                            console.log('since the lineitems were updated properly, let\'s move the STATE of our report to the next stage');
-                            reportModelInstance.state = WAREHOUSE_FULFILL;
-                            reportModelInstance.totalRows = count; // TODO: should we change it to be only what was corss-reference-able?
-                            return client.models.ReportModel.updateAllAsync(
-                              {id: params.reportId},
-                              reportModelInstance
+                                    // send update(s) to loopback
+                                    return client.models.ReportModel.updateRowsAsync(params.reportId, lineitems);
+                                  });
+                              },
+                              {concurrency: 1}
                             )
-                              .tap(function (info) {
-                                console.log(commandName, 'Updated the ReportModel...');
+                              .then(function () {
+                                console.log('done paging serially through all existing stockOrderLineitemModels');
+
+                                console.log('since the lineitems were updated properly, let\'s move the STATE of our report to the next stage');
+                                reportModelInstance.state = WAREHOUSE_FULFILL;
+                                reportModelInstance.totalRows = count; // TODO: should we change it to be only what was corss-reference-able?
+                                return client.models.ReportModel.updateAllAsync(
+                                  {id: params.reportId},
+                                  reportModelInstance
+                                )
+                                  .tap(function (info) {
+                                    console.log(commandName, 'Updated the ReportModel...');
+                                  });
                               });
                           });
                       });
-
                   });
               }
             })
