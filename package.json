@@ -16,6 +16,6 @@
     "serve-favicon": "^2.0.1",
     "shoppinpal-warehouse-mongo": "1.0.7",
     "underscore": "^1.8.3",
-    "vend-nodejs-sdk": "1.0.3"
+    "vend-nodejs-sdk": "1.0.11"
   }
 }
