@@ -35,6 +35,9 @@ $ iron_worker upload warehouse-manager-generate-stock-order
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/local.patricias.41st.sched.payload.json
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/staging.patricias.sched.payload.json
 
+* iron_worker upload create.consignment.products
+  * iron_worker run create.consignment.products --payload-file ./tests/local.patricias.41st.import.payload.json
+
 ## Scheduled Jobs
 
 CDT is -0500
