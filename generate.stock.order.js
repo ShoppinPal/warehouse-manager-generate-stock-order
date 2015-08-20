@@ -8,6 +8,8 @@ var WAREHOUSE_FULFILL = 'warehouse_fulfill';
 var MANAGER_RECEIVE = 'manager_receive';
 var REPORT_COMPLETE = 'report_complete';
 
+var BOXED = 'boxed';
+
 try {
   var fs = require('fs');
   var utils = require('./jobs/utils/utils.js');
@@ -149,7 +151,7 @@ try {
                 return Promise.resolve();
               }
             })
-            .then(function() {
+            .then(function decideOp () {
               // NOTE: no time to investigate why we end up accidently nuking our foreign-keys
               //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
               //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
@@ -174,7 +176,7 @@ try {
                     });
                 });
             })
-            .tap(function(methodName) {
+            .tap(function importStockOrder (methodName) {
               if(methodName !== 'importStockOrder') {
                 console.log('will skip importStockOrder');
                 return Promise.resolve();
@@ -227,6 +229,8 @@ try {
                                         lineitem.quantityOnHand = Number(dilutedProduct.inventory.count);
                                         lineitem.desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
                                         lineitem.type = dilutedProduct.type;
+                                        lineitem.state = BOXED; // boxed by default
+                                        lineitem.boxNumber = 1; // boxed together by default
                                       } else {
                                         console.log('WARN: did not find vend data for lineitem', lineitem);
                                         // TODO: should we queue up these lineitem rows for deletion from the report?
@@ -259,7 +263,7 @@ try {
                   });
               }
             })
-            .tap(function (methodName) {
+            .tap(function generateStockOrder (methodName) {
               if(methodName !== 'generateStockOrder') {
                 console.log('will skip generateStockOrder');
                 return Promise.resolve();
