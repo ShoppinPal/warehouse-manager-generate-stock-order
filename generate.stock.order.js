@@ -229,8 +229,10 @@ try {
                                         lineitem.quantityOnHand = Number(dilutedProduct.inventory.count);
                                         lineitem.desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
                                         lineitem.type = dilutedProduct.type;
+                                        if (lineitem.type) { // warehouse folks can choose to box those lacking department/product-type, manually
                                         lineitem.state = BOXED; // boxed by default
                                         lineitem.boxNumber = 1; // boxed together by default
+                                        }
                                       } else {
                                         console.log('WARN: did not find vend data for lineitem', lineitem);
                                         // TODO: should we queue up these lineitem rows for deletion from the report?
