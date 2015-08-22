@@ -158,13 +158,23 @@ try {
                                 };
                                 //console.log('will create a consignmentProduct: ', consignmentProduct);
                                 return vendSdk.consignments.products.create({body:consignmentProduct}, connectionInfo)
-                                  .then(function (newVendConsignmentProduct) {
-                                    //console.log('newVendConsignmentProduct', newVendConsignmentProduct);
-                                    return Promise.resolve(newVendConsignmentProduct);
+                                  .then(function (newConsignmentProduct) {
+                                    //console.log('newConsignmentProduct', newConsignmentProduct);
+                                    stockOrderLineitemModelInstance.vendConsignmentProductId = newConsignmentProduct.id;
+                                    stockOrderLineitemModelInstance.vendConsignmentProduct = newConsignmentProduct;
+                                    return StockOrderLineitemModel.updateAllAsync(
+                                      {id: stockOrderLineitemModelInstance.id},
+                                      stockOrderLineitemModelInstance
+                                    )
+                                      .tap(function (updatedReportModelInstance) {
+                                        //console.log('updatedStockOrderLineitemModelInstance', updatedStockOrderLineitemModelInstance);
+                                        return Promise.resolve();
+                                      });
                                   });
                               }
                               else {
                                 console.log('skipping lineitems without a Vend productId and/or cost');
+                                return Promise.resolve();
                               }
                             },
                             {concurrency: 1}
