@@ -60,10 +60,45 @@ iron_worker schedule warehouse.manual.mongo \
 --payload-file ./relative/path/to/YOUR_FILE_NAME
   ```
 
-* create 4 scheduled jobs in one fell swoop
+* Test scheduling
+
   ```
-iron_worker schedule warehouse.manual.mongo --label staging.rock.ffcc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.ffcc.payload.json && \
-iron_worker schedule warehouse.manual.mongo --label staging.rock.csc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.csc.payload.json && \
-iron_worker schedule warehouse.manual.mongo --label staging.reno.ffcc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.ffcc.payload.json && \
-iron_worker schedule warehouse.manual.mongo --label staging.reno.csc --start-at "2015-01-01T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.csc.payload.json
+  iron_worker schedule warehouse.manual.mongo --label test1 --start-at "2015-09-07T08:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./tests/local.fermiyontest.okc.ffcc.sched.payload.json
+  ```
+
+* create all scheduled jobs in one fell swoop with cascading/staggered run times
+
+  ```
+iron_worker schedule warehouse.manual.mongo --label patricias.11th.ffcc --start-at "2015-09-07T01:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.11th.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.11th.csc --start-at "2015-09-07T02:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.11th.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.41st.ffcc --start-at "2015-09-07T02:10:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.41st.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.41st.csc --start-at "2015-09-07T02:20:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.41st.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.71st.ffcc --start-at "2015-09-07T02:30:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.71st.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.71st.csc --start-at "2015-09-07T02:40:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.71st.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.arm.ffcc --start-at "2015-09-07T02:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.arm.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.arm.csc --start-at "2015-09-07T03:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.arm.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.cave.ffcc --start-at "2015-09-07T03:10:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.cave.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.cave.csc --start-at "2015-09-07T03:20:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.cave.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.garr.ffcc --start-at "2015-09-07T03:30:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.garr.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.garr.csc --start-at "2015-09-07T03:40:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.garr.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.glen.ffcc --start-at "2015-09-07T03:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.glen.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.glen.csc --start-at "2015-09-07T04:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.glen.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.grav.ffcc --start-at "2015-09-07T04:10:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.grav.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.grav.csc --start-at "2015-09-07T04:20:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.grav.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.kell.ffcc --start-at "2015-09-07T04:30:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.kell.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.kell.csc --start-at "2015-09-07T04:40:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.kell.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.memo.ffcc --start-at "2015-09-07T04:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.memo.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.memo.csc --start-at "2015-09-07T05:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.memo.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.neil.ffcc --start-at "2015-09-07T05:10:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.neil.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.neil.csc --start-at "2015-09-07T05:20:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.neil.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.page.ffcc --start-at "2015-09-07T05:30:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.page.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.page.csc --start-at "2015-09-07T05:40:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.page.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.park.ffcc --start-at "2015-09-07T05:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.park.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.park.csc --start-at "2015-09-07T06:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.park.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.reno.ffcc --start-at "2015-09-07T06:10:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.reno.csc --start-at "2015-09-07T06:20:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.reno.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.rock.ffcc --start-at "2015-09-07T06:30:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.rock.csc --start-at "2015-09-07T06:40:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.rock.csc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.skel.ffcc --start-at "2015-09-07T06:50:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.skel.ffcc.payload.json && \
+iron_worker schedule warehouse.manual.mongo --label patricias.skel.csc --start-at "2015-09-07T07:00:00-05:00" --run-every 604800 --timeout 600 --priority 2 --cluster azure --payload-file ./seed/staging.skel.csc.payload.json
   ```
