@@ -67,7 +67,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       // let's dilute the product data even further
       //console.log(commandName + ' > filtered products:\n', JSON.stringify(filteredProducts,null,2));
       var dilutedProducts = _.object(_.map(filteredProducts, function(product) {
-        var neoProduct =  _.pick(product,'name','supply_price','id','sku','type');
+        var neoProduct =  _.pick(product,'name','supply_price','id','sku','type','tags');
         neoProduct.inventory = _.find(product.inventory, function(inv){
           return inv.outlet_id === outletId;
         });
@@ -86,6 +86,32 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       var rows = [];
       _.each(dilutedProducts, function(dilutedProduct){
         var useRow = true;
+
+        var caseQuantity = undefined;
+        if (dilutedProduct.tags) {
+          var tagsAsCsv = dilutedProduct.tags.trim();
+          //console.log( 'tagsAsCsv: ' + tagsAsCsv );
+          var tagsArray = tagsAsCsv.split(',');
+          if (tagsArray && tagsArray.length>0) {
+            _.each(tagsArray, function(tag) {
+              tag = tag.trim();
+              if (tag.length > 0) {
+                //console.log( 'tag: ' + tag );
+                // http://stackoverflow.com/questions/8993773/javascript-indexof-case-insensitive
+                var prefix = 'CaseQuantity:'.toLowerCase();
+                if (tag.toLowerCase().indexOf(prefix) === 0) {
+                  var caseQty = tag.substr(prefix.length);
+                  //console.log('based on a prefix, adding CaseQuantity: ' +  caseQty);
+                  caseQuantity = Number(caseQty);
+                }
+                else {
+                  //console.log('ignoring anything without a prefix');
+                }
+              }
+            });
+          }
+        }
+
         var quantityOnHand = Number(dilutedProduct.inventory.count);
         var desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
         var orderQuantity = 0;
@@ -118,6 +144,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
             quantityOnHand: quantityOnHand,
             desiredStockLevel: desiredStockLevel,
             orderQuantity: orderQuantity,
+            caseQuantity: caseQuantity,
             supplyPrice: dilutedProduct.supply_price,
             type: dilutedProduct.type,
             reportId: reportId,
