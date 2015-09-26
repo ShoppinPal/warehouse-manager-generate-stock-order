@@ -124,6 +124,14 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
           orderQuantity = desiredStockLevel - quantityOnHand;
           if (orderQuantity > 0) {
             useRow = true;
+            if (caseQuantity) {
+              if ( (orderQuantity % caseQuantity) === 0 ) {
+                //console.log('NO-OP: orderQuantity is already a multiple of caseQuantity');
+              }
+              else {
+                orderQuantity = Math.ceil(orderQuantity / caseQuantity) * caseQuantity;
+              }
+            }
           }
           else {
             console.log('do not waste time on negative or zero orderQuantity', dilutedProduct);
