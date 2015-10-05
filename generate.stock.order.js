@@ -166,18 +166,101 @@ try {
                       }
                     }
                   );
-                  return stockOrderLineitemModels.countAsync()
-                    .then(function (count) {
-                      console.log('inside decideOp(), count:', count);
-                      if (count > 0) {
-                        console.log('Will run the OP for: importStockOrder');
-                        return Promise.resolve('importStockOrder');
-                      } else {
-                        console.log('Will run the OP for: generateStockOrder');
-                        return Promise.resolve('generateStockOrder');
-                      }
-                    });
+                  if (params.op) {
+                    console.log('Will run the OP for: ' + params.op);
+                    return Promise.resolve(params.op);
+                  }
+                  else {
+                    return stockOrderLineitemModels.countAsync()
+                      .then(function (count) {
+                        console.log('inside decideOp(), count:', count);
+                        if (count > 0) {
+                          console.log('Will run the OP for: importStockOrder');
+                          return Promise.resolve('importStockOrder');
+                        } else {
+                          console.log('Will run the OP for: generateStockOrder');
+                          return Promise.resolve('generateStockOrder');
+                        }
+                      });
+                  }
                 });
+            })
+            .tap(function removeUnfulfilledProducts (methodName) {
+              if(methodName !== 'removeUnfulfilledProducts') {
+                console.log('will skip removeUnfulfilledProducts');
+                return Promise.resolve();
+              }
+              else {
+                // NOTE: no time to investigate why we end up accidently nuking our foreign-keys
+                //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
+                //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
+                return client.models.ReportModel.findByIdAsync(params.reportId)
+                  .then(function(reportModelInstance){
+                    var stockOrderLineitemModels = Promise.promisifyAll(
+                      reportModelInstance.stockOrderLineitemModels,
+                      {
+                        filter: function(name, func, target){
+                          return !( name == 'validate');
+                        }
+                      }
+                    );
+                    var where = { // only work with rows that need to be deleted
+                      //reportId: params.reportId, // don't need this, lineitem object is a relational instance already
+                      or: [
+                        {fulfilledQuantity: null},
+                        {fulfilledQuantity: {exists: false}},
+                        {fulfilledQuantity: {lte: 0}}
+                      ],
+                      vendConsignmentProductId: {ne: null}
+                    };
+                    return stockOrderLineitemModels.countAsync(where)
+                      .then(function (count) {
+                        var pageSize = 200;
+                        var totalPages = Math.ceil(count / pageSize);
+                        console.log('Will traverse %d rows by fetching %d page(s) of size <= %d', count, totalPages, pageSize);
+
+                        var pseudoArrayToIterateOverPagesSerially = new Array(totalPages);
+                        for (var i=0; i<totalPages; i++) {
+                          pseudoArrayToIterateOverPagesSerially[i] = i+1;
+                        }
+
+                        // constraint Promise.map with concurrency of 1 around pseudoArrayIterateAllPages
+                        return Promise.map(
+                          pseudoArrayToIterateOverPagesSerially,
+                          function (pageNumber) {
+                            return client.models.ReportModel.getRowsAsync(params.reportId, pageSize, pageNumber, where)
+                              .then(function (lineitems) {
+                                console.log('total lineitems retrieved for page #%d: %d', pageNumber, lineitems.length);
+
+                                return Promise.map(
+                                  lineitems,
+                                  function (lineitem) {
+                                    var deleteStockOrderRow = require('./jobs/delete-stock-order-row.js');
+                                    return deleteStockOrderRow.run(lineitem.vendConsignmentProductId)
+                                      .catch(function(error) {
+                                        console.error('removeUnfulfilledProducts dot-catch block');
+                                        console.log(commandName, 'ERROR', error);
+                                        return Promise.resolve(); // ignore the error to keep going
+                                      });
+                                  },
+                                  {concurrency: 1}
+                                )
+                                  .then(function () {
+                                    console.log('done deleting ALL lineitems for page #%d', pageNumber);
+                                    return Promise.resolve();
+                                  });
+                              });
+                          },
+                          {concurrency: 1}
+                        )
+                          .then(function () {
+                            console.log('all pages done');
+                            console.log('done with removeUnfulfilledProducts op');
+                            return Promise.resolve();
+                          });
+                      });
+                  });
+              }
             })
             .tap(function importStockOrder (methodName) {
               if(methodName !== 'importStockOrder') {

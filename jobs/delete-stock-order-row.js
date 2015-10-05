@@ -1,0 +1,39 @@
+var Promise = require('bluebird');
+var asking = Promise.promisifyAll(require('asking'));
+
+var vendSdk = require('vend-nodejs-sdk')({});
+var utils = require('./utils/utils.js');
+
+var _ = require('underscore');
+var path = require('path');
+
+// Global variable for logging
+var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
+
+var DeleteStockOrderRow = {
+  desc: 'Delete a Stock Order row by id\n' +
+        '\t\t\t\t\t' + '--rowId <consignmentProductId>',
+
+  options: { // must not clash with global aliases: -t -d -f
+    rowId: {
+      type: 'string',
+      required: true
+    }
+  },
+
+  run: function (rowId) {
+    console.log('rowId', rowId);
+
+    var connectionInfo = utils.loadOauthTokens();
+    commandName = commandName + '-'+ connectionInfo.domainPrefix;
+
+    var args = vendSdk.args.consignments.products.remove();
+    args.apiId.value = rowId;
+    return vendSdk.consignments.products.remove(args, connectionInfo)
+      .catch(function(e) {
+        console.error(commandName + ' > An unexpected error occurred: ', e);
+      });
+  }
+};
+
+module.exports = DeleteStockOrderRow;

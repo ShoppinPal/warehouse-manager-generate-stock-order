@@ -1467,8 +1467,8 @@
       }
     },
     "shoppinpal-warehouse-mongo": {
-      "version": "1.0.9",
-      "from": "shoppinpal-warehouse-mongo@1.0.9",
+      "version": "1.0.10",
+      "from": "shoppinpal-warehouse-mongo@1.0.10",
       "dependencies": {
         "bluebird": {
           "version": "2.9.14",
