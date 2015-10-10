@@ -166,22 +166,17 @@ try {
                       }
                     }
                   );
-                  if (params.op === 'importStockOrder') {
-                    return stockOrderLineitemModels.countAsync()
-                      .then(function (count) {
-                        console.log('inside decideOp(), count:', count);
-                        if (count > 0) { // if rows already exist, it means the raw data was imported already
-                          console.log('Will run the OP for: ' + params.op);
-                          return Promise.resolve(params.op);
-                        }
-                        else {
-                          return Promise.reject(commandName + ' > raw data has not been imported yet');
-                        }
-                      });
-                  }
-                  else {
-                    return Promise.reject(commandName + ' > params.op is incorrect or unspecified');
-                  }
+                  return stockOrderLineitemModels.countAsync()
+                    .then(function (count) {
+                      console.log('inside decideOp(), count:', count);
+                      if (count > 0) { // if rows already exist, it means the raw data was imported already
+                        console.log('Will run the OP for: importStockOrder');
+                        return Promise.resolve('importStockOrder');
+                      }
+                      else {
+                        return Promise.reject(commandName + ' > raw data has not been imported yet');
+                      }
+                    });
                 });
             })
             .tap(function importStockOrder (methodName) {
