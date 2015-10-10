@@ -30,6 +30,10 @@ var DeleteStockOrderRow = {
     var args = vendSdk.args.consignments.products.remove();
     args.apiId.value = rowId;
     return vendSdk.consignments.products.remove(args, connectionInfo)
+      .tap(function() {
+        //console.log(commandName + ' > 1st tap block');
+        return utils.updateOauthTokens(connectionInfo);
+      })
       .catch(function(e) {
         console.error(commandName + ' > An unexpected error occurred: ', e);
       });
