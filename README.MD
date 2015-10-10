@@ -35,6 +35,10 @@ $ iron_worker upload warehouse-manager-generate-stock-order
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/local.patricias.41st.sched.payload.json
   * iron_worker run warehouse.manual.mongo --payload-file ./tests/staging.patricias.sched.payload.json
 
+* iron_worker upload wh.order.gen.parallel --worker-config iron.json
+  * iron_worker run wh.order.gen.parallel --worker-config iron.json --payload-file ./tests/local.fermiyontest.norman.ffcc.paged.generate.payload.json
+  * iron_worker run wh.order.gen.parallel --worker-config iron.json --payload-file ./tests/local.fermiyontest.norman.ffcc.paged.process.payload.json
+
 * iron_worker upload create.consignment.products
   * iron_worker run create.consignment.products --payload-file ./tests/local.patricias.41st.import.payload.json
 
