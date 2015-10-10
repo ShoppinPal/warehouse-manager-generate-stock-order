@@ -132,7 +132,7 @@ try {
                   })
                   .then(function (reportModelInstance) {
                     console.log('new reportModelInstance:', reportModelInstance);
-                    params.reportId = reportModelInstance.id;
+                    params.reportId = reportModelInstance.id; // save the new report id into the params
                     return Promise.resolve();
                   });
               }
@@ -174,10 +174,10 @@ try {
                     return stockOrderLineitemModels.countAsync()
                       .then(function (count) {
                         console.log('inside decideOp(), count:', count);
-                        if (count > 0) {
+                        if (count > 0) { // if rows already exist, it means the raw data was imported already
                           console.log('Will run the OP for: importStockOrder');
                           return Promise.resolve('importStockOrder');
-                        } else {
+                        } else { // if rows do NOT exist, means we have to get the raw material ourselves
                           console.log('Will run the OP for: generateStockOrder');
                           return Promise.resolve('generateStockOrder');
                         }
