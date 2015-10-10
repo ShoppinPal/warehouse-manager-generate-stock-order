@@ -24,9 +24,12 @@ var FetchProductPaginationInfo = {
       return Promise.reject(commandName + ' > did not get a pageSize to work with');
     }
     var args = vendSdk.args.products.fetch();
+    args.orderBy.value = 'id';
+    args.page.value = 1;
     args.pageSize.value = pageSize;
+    args.active.value = true;
 
-    console.log(commandName + ' > will fetch pagination info');
+    console.log(commandName + ' > will fetch pagination info with args: ', args);
     return vendSdk.products.fetchPaginationInfo(args, connectionInfo)
       .tap(function(paginationInfo) {
         //console.log(commandName + ' > 1st tap block');

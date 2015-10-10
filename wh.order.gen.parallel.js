@@ -190,7 +190,6 @@ try {
                     console.log('paginationInfo', paginationInfo);
                     if (paginationInfo) {
                       console.log(commandName, '> generatePagedJobs > # of pages to process: ' + paginationInfo.pages);
-                      params.totalPages = paginationInfo.pages;
                       var pageNumbers = [];
                       for (var i=1; i <= paginationInfo.pages; i++) {
                         pageNumbers.push(i);
@@ -202,6 +201,7 @@ try {
                             'with a delay of', pageNumber*delayPagesInIncrementsOf, 'seconds');
                           params.op = 'processPagedJob';
                           params.pageNumber = pageNumber;
+                          params.totalPages = paginationInfo.pages;
                           return request.post({
                             url: config.ironWorkersUrl,//'https://worker-aws-us-east-1.iron.io:443/2/projects/53c6ac4f5569d5000900005f/tasks/webhook',//ReportModel.app.get('ironWorkersUrl'),
                             qs: {
@@ -224,6 +224,7 @@ try {
                       console.log(commandName, '> generatePagedJobs > There is only one page to process');
                       params.op = 'processPagedJob';
                       params.pageNumber = 1;
+                      params.totalPages = 1;
                       return request.post({
                         url: config.ironWorkersUrl,//'https://worker-aws-us-east-1.iron.io:443/2/projects/53c6ac4f5569d5000900005f/tasks/webhook',//ReportModel.app.get('ironWorkersUrl'),
                         qs: {

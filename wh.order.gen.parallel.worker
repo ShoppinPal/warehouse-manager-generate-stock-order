@@ -7,7 +7,7 @@ exec 'wh.order.gen.parallel.js'
 
 dir 'node_modules' # include dependency files when uploading
 file 'package.json' # include dependency manifest when uploading
-#file 'npm-shrinkwrap.json' # include dependency manifest when uploading
+file 'npm-shrinkwrap.json' # include dependency manifest when uploading
 
 #name 'wh.order.gen.parallel'
 
