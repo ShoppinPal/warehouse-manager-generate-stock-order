@@ -42,9 +42,9 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
   var args = vendSdk.args.products.fetch();
   args.orderBy.value = 'id';
   args.page.value = pageNumber;
-  args.pageSize.value = pageSize;
+  args.pageSize.value = pageSize || 200;
   args.active.value = true;
-  console.log(commandName + ' > will work on page # ' + pageNumber);
+  console.log(commandName + ' > will work on page # ' + args.page.value + ' w/ pageSize: ' + args.pageSize.value);
 
   return vendSdk.products.fetch(args, connectionInfo)
     /*.tap(function(products) {
@@ -215,15 +215,16 @@ var GenerateStockOrderPaged = {
     }
   },
 
-  run: function (reportId, outletId, supplierId, userId, pageNumber) {
+  run: function (reportId, outletId, supplierId, userId, pageNumber, pageSize) {
     console.log('reportId', reportId,
       'outletId', outletId,
       'supplierId', supplierId,
       'userId', userId,
-      'pageNumber', pageNumber);
+      'pageNumber', pageNumber,
+      'pageSize', pageSize);
 
     var connectionInfo = utils.loadOauthTokens();
-    commandName = commandName + '-'+ connectionInfo.domainPrefix;
+    //commandName = commandName + '-'+ connectionInfo.domainPrefix;
 
     return validateSupplier(supplierId, connectionInfo)
       .tap(function(resolvedSupplierName) {
@@ -234,7 +235,7 @@ var GenerateStockOrderPaged = {
         return validateOutlet(outletId, connectionInfo)
           .then(function(resolvedOutletId) {
             outletId = resolvedOutletId;
-            return runMe(connectionInfo, userId, reportId, outletId, resolvedSupplierName, pageNumber);
+            return runMe(connectionInfo, userId, reportId, outletId, resolvedSupplierName, pageNumber, pageSize);
           });
       });
   }
