@@ -259,7 +259,7 @@ try {
                                               }
                                             }
                                             else {
-                                              console.log('WARN: did not find vend data for lineitem', lineitem);
+                                              console.log('WARN: did not find cached vend data for lineitem', lineitem);
                                               // TODO: should we queue up these lineitem rows for deletion from the report?
                                               //       or is it better to leave them for reporting purposes?
                                             }

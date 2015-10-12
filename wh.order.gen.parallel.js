@@ -280,7 +280,10 @@ try {
                   config.pageSizeForVendFetches
                 )
                   .then(function (rows) {
-                    console.log(commandName, '> processPagedJob > Will save ' + rows.length + ' lineitems');
+                    console.log(commandName, '> processPagedJob > # of line items to be saved: ' + rows.length);
+                    if (!rows || rows.length < 1) {
+                      return Promise.resolve();
+                    }
                     return client.models.StockOrderLineitemModel.createAsync(rows)
                       .tap(function (stockOrderLineitemModelInstances) {
                         // TODO: file a bug w/ strongloop support, the data that comes back
