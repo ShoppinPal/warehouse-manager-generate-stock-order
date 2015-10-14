@@ -84,6 +84,10 @@ try {
           // the strong-remoting RemoteObjects instance
           var remotes = remoteDS.connector.remotes;
 
+          var UserModel = client.models.UserModel;
+          var ReportModel = client.models.ReportModel;
+          var StockOrderLineitemModel = client.models.StockOrderLineitemModel;
+
           // TODO: (2) figure out the total # of pages we will be dealing with
           //           ex: 42 pages total
           // TODO: (3) run the report for totalPages/5 pages
@@ -99,7 +103,7 @@ try {
               if (params.reportId === undefined || params.reportId === null) {
                 console.log(commandName, 'need to create a new report');
 
-                return client.models.UserModel.loginAsync(params.credentials) // get an access token
+                return UserModel.loginAsync(params.credentials) // get an access token
                   .then(function(token) {
                     console.log('Logged in as', params.credentials.email);
 
@@ -117,7 +121,7 @@ try {
                     return Promise.resolve();
                   })
                   .then(function(){
-                    return client.models.ReportModel.createAsync({
+                    return ReportModel.createAsync({
                       userModelToReportModelId: params.loopbackAccessToken.userId, // explicitly setup the foreignKeys for related models
                       state: REPORT_EMPTY,
                       outlet: {
@@ -156,7 +160,7 @@ try {
               //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
               //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
 
-              return client.models.ReportModel.findByIdAsync(params.reportId)
+              return ReportModel.findByIdAsync(params.reportId)
                 .then(function(reportModelInstance){
                   var stockOrderLineitemModels = Promise.promisifyAll(
                     reportModelInstance.stockOrderLineitemModels,
@@ -184,7 +188,7 @@ try {
                 // NOTE: no time to investigate why we end up accidently nuking our foreign-keys
                 //       later on somwhere in code ... when we use this shortcut to avoid one extra server call
                 //var reportModelInstance = new client.models.ReportModel({id: params.reportId});
-                return client.models.ReportModel.findByIdAsync(params.reportId)
+                return ReportModel.findByIdAsync(params.reportId)
                   .then(function(reportModelInstance){
                     console.log(commandName, 'Found the ReportModel...', reportModelInstance);
                     var stockOrderLineitemModels = Promise.promisifyAll(
@@ -219,22 +223,40 @@ try {
                         return Promise.map(
                           pseudoArrayToIterateOverPagesSerially,
                           function (pageNumber) {
-                            return client.models.ReportModel.getRowsAsync(params.reportId, pageSize, pageNumber, where)
+                            return ReportModel.getRowsAsync(params.reportId, pageSize, pageNumber, where)
                               .then(function (lineitems) {
                                 console.log('total lineitems retrieved for page #%d: %d', pageNumber, lineitems.length);
 
                                 return Promise.map(
                                   lineitems,
                                   function (lineitem) {
-                                    console.log('delete lineitem w/ productId:', lineitem.productId, 'name:', lineitem.name);
+                                    console.log('DELETE lineitem w/ productId:', lineitem.productId, '\n',
+                                      'name:', lineitem.name, '\n',
+                                      'state:', lineitem.state, '\n',
+                                      'ordered:', lineitem.orderQuantity,
+                                      ', fulfilled:', lineitem.fulfilledQuantity,
+                                      ', received:', lineitem.receivedQuantity);
                                     var deleteStockOrderRow = require('./jobs/delete-stock-order-row.js');
                                     return deleteStockOrderRow.run(lineitem.vendConsignmentProductId)
-                                      /*.then(function(){
-                                        // TODO: delete `boxNumber` and
-                                        //       change `state`
-                                        //         from StockOrderLineitemModelStates.BOXED (boxed)
-                                        //         to StockOrderLineitemModelStates.ORDERED (complete)
-                                      })*/
+                                    //return Promise.resolve() // for TESTING db updates repeatedly
+                                      .then(function(){
+                                        if(lineitem.state === StockOrderLineitemModel.StockOrderLineitemModelStates.BOXED) {
+                                          console.log(commandName, ' > for an unfulfilled lineitem, ' +
+                                            'we will delete boxNumber and change state back to ORDERED');
+
+                                          var lineitemModelInstance = new StockOrderLineitemModel({id: lineitem.id});
+                                          return lineitemModelInstance.updateAttributesAsync({
+                                            state: StockOrderLineitemModel.StockOrderLineitemModelStates.ORDERED,
+                                            boxNumber: null
+                                          })
+                                            .tap(function (info) {
+                                              console.log(commandName, 'Updated the StockOrderLineitemModel...', info);
+                                            });
+                                        }
+                                        else {
+                                          return Promise.resolve(); // do nothing
+                                        }
+                                      })
                                       .catch(function(error) {
                                         console.error('removeUnfulfilledProducts dot-catch block');
                                         console.log(commandName, 'ERROR', error);
