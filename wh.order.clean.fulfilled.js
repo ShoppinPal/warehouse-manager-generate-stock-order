@@ -230,7 +230,7 @@ try {
                                 return Promise.map(
                                   lineitems,
                                   function (lineitem) {
-                                    console.log('DELETE lineitem w/ productId:', lineitem.productId, '\n',
+                                    console.log('DELETE lineitem from Vend w/ productId:', lineitem.productId, '\n',
                                       'name:', lineitem.name, '\n',
                                       'state:', lineitem.state, '\n',
                                       'ordered:', lineitem.orderQuantity,

@@ -225,7 +225,12 @@ try {
                                 return Promise.map(
                                   lineitems,
                                   function (lineitem) {
-                                    console.log('delete lineitem w/ productId:', lineitem.productId, 'name:', lineitem.name);
+                                    console.log('DELETE lineitem from Vend w/ productId:', lineitem.productId, '\n',
+                                      'name:', lineitem.name, '\n',
+                                      'state:', lineitem.state, '\n',
+                                      'ordered:', lineitem.orderQuantity,
+                                      ', fulfilled:', lineitem.fulfilledQuantity,
+                                      ', received:', lineitem.receivedQuantity);
                                     var deleteStockOrderRow = require('./jobs/delete-stock-order-row.js');
                                     return deleteStockOrderRow.run(lineitem.vendConsignmentProductId)
                                       .catch(function(error) {
