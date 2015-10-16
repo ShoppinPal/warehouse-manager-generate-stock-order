@@ -264,6 +264,12 @@ try {
                                               //       or is it better to leave them for reporting purposes?
                                             }
                                             return Promise.resolve();
+                                          })
+                                          .catch(function (error) {
+                                            console.error('failed to lookup vend data from cache, maybe it expired or maybe it was never placed there');
+                                            console.log(commandName, 'ERROR', error);
+                                            console.log('ignoring this ERROR, so that we may finish the rest of the process');
+                                            return Promise.resolve();
                                           });
                                       },
                                       {concurrency: 1}
