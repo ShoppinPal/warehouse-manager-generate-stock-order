@@ -91,7 +91,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
         //var key = product.sku + ':' + resolvedSupplierName + ':' + outletId; // the side performing `get from cache` does not have the supplier or outlet info
         var key = product.sku + ':' + taskId;
         console.log(commandName, '> myCacheStrategy', '> caching w/ key:', key);
-        return cache.putAsync('my-cache', key, { value: JSON.stringify(product,null,0), expires_in: 60*10}) // expires in 10 minutes
+        return cache.putAsync('my-cache', key, { value: JSON.stringify(product,null,0), expires_in: 60*20}) // expires in 20 minutes
           .then(function(){
             console.log(commandName, '> myCacheStrategy', '> after putAsync:', arguments);
             return Promise.resolve();
