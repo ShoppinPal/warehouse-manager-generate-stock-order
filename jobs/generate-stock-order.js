@@ -44,27 +44,6 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
     .then(function(products) {
       console.log(commandName + ' > 1st tap block');
       console.log(commandName + ' > original products.length: ' + products.length);
-      console.log(commandName + ' > Showing products with zero inventory outlet wise to delete :  ');
-
-
-      //for filtering out products with zero inventory at all outlets
-      var deleteFromVend = [];
-      products.forEach(function(product){
-
-      	if(product.name == "Discount"){
-
-      	}
-      	else{
-      		var singleProductInventory = product.inventory;
-      		singleProductInventory.forEach(function(inv){
-      			if(inv.count == 0.00000)
-      			{
-      				productToDelete = {outletName : inv.outlet_name , productName : product.name};
-      				deleteFromVend.push(productToDelete);
-      			}
-      		});
-      	}
-      });
 
 
       deleteFromVend.forEach(function(deleteProduct){
