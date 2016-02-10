@@ -45,11 +45,6 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
       console.log(commandName + ' > 1st tap block');
       console.log(commandName + ' > original products.length: ' + products.length);
 
-
-      deleteFromVend.forEach(function(deleteProduct){
-      	console.log(commandName + ' > Product : ' + deleteProduct.productName + ' to be deleted from outlet ' + deleteProduct.outletName);
-      });
-
       // keep only the products that have an inventory field
       // and belong to the store/outlet of interest to us
       // and belong to the supplier of interest to us
