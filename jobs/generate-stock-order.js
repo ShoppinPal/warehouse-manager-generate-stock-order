@@ -44,7 +44,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
     .then(function(products) {
       console.log(commandName + ' > 1st tap block');
       console.log(commandName + ' > original products.length: ' + products.length);
-
+      console.log(commandName + ' > Showing products with zero inventory outlet wise to delete :  ');
       // keep only the products that have an inventory field
       // and belong to the store/outlet of interest to us
       // and belong to the supplier of interest to us
