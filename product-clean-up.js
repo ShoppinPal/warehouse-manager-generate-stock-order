@@ -187,29 +187,25 @@ try {
                 products.forEach(function(product){
                   if(!(filterExists(product.id,dilutedSales)))
                   {
-                    if(!(deletionExists(product,deleteFromVend)))
-                    {
-                      console.log("Zero Sales : " + product.name);
-                      deleteFromVend.push(product);
+                    
+
+                    if(product.name == "Discount"){
+
                     }
-                  }
-
-                  if(product.name == "Discount"){
-
-                  }
-                  else
-                  {
-                    var singleProductInventory = product.inventory;
-                    singleProductInventory.forEach(function(inv){
-                      if(inv.count == 0.00000)
-                      {
-                        if(!(deletionExists(product,deleteFromVend)))
+                    else
+                    {
+                      var singleProductInventory = product.inventory;
+                      singleProductInventory.forEach(function(inv){
+                        if(inv.count == 0.00000)
                         {
-                          console.log("Zero inventory : " + product.name);
-                          deleteFromVend.push(product);
+                          if(!(deletionExists(product,deleteFromVend)))
+                          {
+                            console.log("Zero inventory : " + product.name);
+                            deleteFromVend.push(product);
+                          }
                         }
-                      }
-                    });
+                      });
+                    }
                   }
                 })
 
