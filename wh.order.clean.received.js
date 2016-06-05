@@ -44,6 +44,7 @@ try {
   console.log(commandName, 'task_id:', task_id);
 
   try {
+    process.env['User-Agent'] = task_id + ':' + commandName + ':' + params.domainPrefix;
     return utils.savePayloadConfigToFiles(params)
       .then(function () {
         try {

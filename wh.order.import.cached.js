@@ -52,6 +52,7 @@ try {
       token: config.ironWorkersOauthToken
     }));
 
+    process.env['User-Agent'] = task_id + ':' + commandName + ':' + params.domainPrefix;
     return utils.savePayloadConfigToFiles(params)
       .then(function () {
         try {
