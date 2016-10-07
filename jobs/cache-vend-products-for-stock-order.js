@@ -106,6 +106,7 @@ var runMe = function(connectionInfo, userId, reportId, outletId, resolvedSupplie
   })
     .catch(function(e) {
       console.error(commandName, '> myCacheStrategy', '> An unexpected error occurred: ', e);
+      return Promise.reject(e);
     });
 };
 
