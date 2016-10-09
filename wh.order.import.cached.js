@@ -10,6 +10,23 @@ var REPORT_COMPLETE = 'report_complete';
 
 var BOXED = 'boxed';
 
+/* When a generic error without a helpful stacktrace occurs, it makes troubleshooting difficult.
+ *
+ * Without knowing the depth or location at which the error took place,
+ * we are forced to litter the code with log statements.
+ *
+ * This is why, despite decent error propagation, our code has way more catch statements then needed!
+ * We are prepared for a situation where we can easily identify the closest code block
+ * where the problem in the occured.
+ *
+ * With that in mind, there are 3 usecases:
+ * 1. We want to log the error but still continue by eating or forgiving the error ... due to some "business logic"
+ * 2. We want to log the error and propagate it as well ... this makes little to no sense!
+ *    Why have the same error logged by multiple catch blocks? How is that helpful?
+ *    Its better to log it and then fail-fast, rather than creating redundant rows of logs
+ *    that might confuse the person who is troubleshooting a problem
+ * 3. We want to log the error and fail-fast.
+ */
 try {
   var fs = require('fs');
   var utils = require('./jobs/utils/utils.js');
@@ -312,7 +329,7 @@ try {
         catch (e) {
           console.error('3rd last catch block');
           console.error(commandName, e);
-          // TODO: throw or float up promise chain or just exit the worker process here?
+          process.exit(FAILURE); // error-handling-usecase-3
         }
       })
       .catch(function (error) {
@@ -324,7 +341,7 @@ try {
   catch (e) {
     console.error('2nd last catch block');
     console.error(commandName, e);
-    // TODO: throw or float up promise chain or just exit the worker process here?
+    process.exit(FAILURE); // error-handling-usecase-3
   }
 
 }
