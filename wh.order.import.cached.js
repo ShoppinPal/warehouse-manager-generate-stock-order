@@ -269,7 +269,9 @@ try {
                                               lineitem.name = dilutedProduct.name;
                                               lineitem.quantityOnHand = Number(dilutedProduct.inventory.count);
                                               lineitem.desiredStockLevel = Number(dilutedProduct.inventory['reorder_point']);
-                                              lineitem.fulfilledQuantity = lineitem.orderQuantity;
+                                              if(!(lineitem.fulfilledQuantity)){
+						lineitem.fulfilledQuantity = lineitem.orderQuantity;
+					      }
                                               lineitem.type = dilutedProduct.type;
                                               if (lineitem.type) { // warehouse folks can choose to box those lacking department/product-type, manually
                                                 lineitem.state = BOXED; // boxed by default
