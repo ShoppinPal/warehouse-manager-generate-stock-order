@@ -263,8 +263,13 @@ try {
                                 return Promise.resolve();
                               });
                           });
-                        return Promise.resolve();
                       });
+                  })
+                  .then(function(){
+                    return utils.notifyClient(params, config, {
+                      taskId: task_id,
+                      message: 'Your '+params.supplierName+' order for '+params.outletName+' had been generated.'
+                    });
                   })
                   .catch(function (error) {
                     console.error(depth1, '> dot-catch block');

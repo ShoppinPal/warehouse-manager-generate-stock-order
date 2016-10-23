@@ -5,6 +5,7 @@ var moment = require('moment');
 var _ = require('underscore');
 var path = require('path');
 var vendSdk = require('vend-nodejs-sdk')({});
+var requestPromise = require('request-promise');
 
 var savePayloadConfigToFiles = function(payload){
   console.log('inside savePayloadConfigToFiles()');
@@ -130,8 +131,30 @@ var exportToJsonFileFormat = function(commandName, data){
   }
 };
 
+var notifyClient = function(taskPayload, taskConfig, notificationPayload) {
+  var notificationUrl = taskPayload.notificationUrl || taskConfig.notificationUrl;
+  if(notificationUrl && taskPayload.notificationId) {
+    notificationPayload.notificationId = taskPayload.notificationId;
+    var options = {
+      method: 'POST'
+      ,uri: notificationUrl
+      ,form: notificationPayload // Will be urlencoded
+    };
+    return requestPromise(options)
+      .catch(function (err) {
+        console.error('Client notification failed.', err);
+        return Promise.resolve(); // the job should still be consider successful
+      });
+  }
+  else {
+    console.log('Client was not notified. Please configure notificationUrl and notificationId.');
+    return Promise.resolve(); // the job should still be consider successful
+  }
+};
+
 exports.savePayloadConfigToFiles = savePayloadConfigToFiles;
 exports.getAbsoluteFilename = getAbsoluteFilename;
 exports.loadOauthTokens = loadOauthTokens;
 exports.updateOauthTokens = updateOauthTokens;
 exports.exportToJsonFileFormat = exportToJsonFileFormat;
+exports.notifyClient = notifyClient;
