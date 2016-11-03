@@ -268,7 +268,7 @@ try {
                   .then(function(){
                     return utils.notifyClient(params, config, {
                       taskId: task_id,
-                      message: 'Your '+params.supplierName+' order for '+params.outletName+' had been generated.'
+                      message: 'Your '+params.supplierName+' order for '+params.outletName+' has been generated.'
                     });
                   })
                   .catch(function (error) {
