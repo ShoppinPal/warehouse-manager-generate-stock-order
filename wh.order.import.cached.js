@@ -33,7 +33,7 @@ try {
   var path = require('path');
   var Promise = require('bluebird');
   var _ = require('underscore');
-
+  var vendSdk = require('vend-nodejs-sdk')({});
   // Global variable for logging
   var commandName = path.basename(__filename, '.js'); // gives the filename without the .js extension
 
@@ -245,7 +245,7 @@ try {
                             for (var i=0; i<totalPages; i++) {
                               pseudoArrayToIterateOverPagesSerially[i] = i+1;
                             }
-
+                            var itemsFailedFromIronCache = [];
                             // constraint Promise.map with concurrency of 1 around pseudoArrayIterateAllPages
                             return Promise.map(
                               pseudoArrayToIterateOverPagesSerially,
@@ -287,6 +287,8 @@ try {
                                           })
                                           .catch(function (error) {
                                             console.error('failed to lookup vend data from cache, maybe it expired or maybe it was never placed there');
+                                            itemsFailedFromIronCache.push(lineitem.sku);
+                                            console.log(commandName,'Pushed failed item : ',lineitem);
                                             console.log(commandName, 'ERROR', error);
                                             console.log('ignoring this ERROR, so that we may finish the rest of the process');
                                             return Promise.resolve();
@@ -295,10 +297,53 @@ try {
                                       {concurrency: 1}
                                     )
                                       .then(function(){
-                                        console.log('cross-referenced and filled out lineitems against data from IronCache');
-                                        console.log('will send update(s) to loopback');
-                                        return client.models.ReportModel.updateRowsAsync(params.reportId, lineitems);
-                                      });
+                                        var connectionInfo = utils.loadOauthTokens();
+
+                                        var failedFromCache = function(sku,failedItems){
+                                          var i = null;
+                                          for (i = 0; failedItems.length > i; i += 1) {
+                                            if (failedItems[i] === sku) {
+                                              return true;
+                                            }
+                                          }
+                                          return false;
+                                        };
+
+                                        return Promise.map(lineitems,
+                                          function(lineitem) {
+                                            if (failedFromCache(lineitem.sku, itemsFailedFromIronCache)) {
+
+                                              return vendSdk.products.fetchBySku({sku: {value: lineitem.sku}}, connectionInfo)
+                                                .then(function (response) {
+                                                  var product = response.products[0];
+                                                  var neoProduct =  _.pick(product,'name','supply_price','id','sku','type');
+                                                  neoProduct.inventory = _.find(product.inventory, function(inv){
+                                                    return inv.outlet_id === params.outletId;
+                                                  });
+
+                                                  lineitem.productId = neoProduct.id;
+                                                  lineitem.name = neoProduct.name;
+                                                  lineitem.quantityOnHand = Number(neoProduct.inventory.count);
+                                                  lineitem.desiredStockLevel = Number(neoProduct.inventory['reorder_point']);
+                                                  lineitem.fulfilledQuantity = lineitem.orderQuantity;
+                                                  lineitem.type = neoProduct.type;
+                                                  if (lineitem.type) { // warehouse folks can choose to box those lacking department/product-type, manually
+                                                    lineitem.state = BOXED; // boxed by default
+                                                    lineitem.boxNumber = 1; // boxed together by default
+                                                  }
+                                                  console.log(lineitem);
+                                                  return Promise.resolve();
+                                                });
+                                            }
+                                        },
+                                          {concurrency:1}
+                                        )
+                                          .then(function(){
+                                            console.log('cross-referenced and filled out lineitems against data from IronCache');
+                                            console.log('will send update(s) to loopback');
+                                            return client.models.ReportModel.updateRowsAsync(params.reportId, lineitems);
+                                          });
+                                      })
                                   });
                               },
                               {concurrency: 1}
